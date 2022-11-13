@@ -3,6 +3,8 @@ package com.quatex.evaproxy.repository;
 import com.quatex.evaproxy.Store;
 import com.quatex.evaproxy.entity.PromoEntity;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -17,29 +19,32 @@ public class PromoCodeRepository {
         store.store(PROMO, new HashMap<>());
     }
 
-    public List<PromoEntity> getAll() {
-        return Optional.ofNullable(getStore()).map(Map::values)
-                .map(List::copyOf)
-                .orElse(Collections.emptyList());
+    public Flux<PromoEntity> getAll() {
+        return getStore().flatMapMany(db -> Flux.fromIterable(db.values()));
     }
 
-    public PromoEntity getByCode(String code) {
-        return getStore().get(code);
+    public Mono<PromoEntity> getByCode(String code) {
+        return getStore().handle((store, synchronousSink) -> {
+            final PromoEntity promoEntity = store.get(code);
+            if (promoEntity != null) {
+                synchronousSink.next(promoEntity);
+            }
+        });
     }
 
     public void create(PromoEntity promoEntity) {
-        getStore().put(promoEntity.getCode(), promoEntity);
+        getStore().doOnNext(store -> store.put(promoEntity.getCode(), promoEntity)).subscribe();
     }
 
     public void update(PromoEntity promoEntity) {
-        getStore().put(promoEntity.getCode(), promoEntity);
+        getStore().doOnNext(store -> store.put(promoEntity.getCode(), promoEntity)).subscribe();
     }
 
-    private Map<String,PromoEntity> getStore() {
+    private Mono<Map<String, PromoEntity>> getStore() {
         return store.getValueObj(PROMO);
     }
 
     public void delete(String code) {
-        getStore().remove(code);
+        getStore().doOnNext(store -> store.remove(code)).subscribe();
     }
 }

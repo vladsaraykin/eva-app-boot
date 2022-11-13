@@ -6,8 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.util.Map;
 
 @Service
 public class PromoCodeService {
@@ -18,42 +20,39 @@ public class PromoCodeService {
         this.promoCodeRepository = promoCodeRepository;
     }
 
-    public List<PromoEntity> getAll() {
+    public Flux<PromoEntity> getAll() {
         return promoCodeRepository.getAll();
     }
 
-    public PromoEntity getByCode(String code) {
-        PromoEntity value = promoCodeRepository.getByCode(code);
-        if (value == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return value;
+    public Mono<PromoEntity> getByCode(String code) {
+        return promoCodeRepository.getByCode(code)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
-    public PromoEntity create(PromoEntity promoEntity) {
+    public Mono<PromoEntity> create(PromoEntity promoEntity) {
         if (StringUtils.isBlank(promoEntity.getCode())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Code not be null");
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Code not be null"));
         }
-        PromoEntity value = promoCodeRepository.getByCode(promoEntity.getCode());
-        if (value != null) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "This code has already exist");
-        }
-        promoCodeRepository.create(promoEntity);
-        return promoEntity;
+        return promoCodeRepository.getByCode(promoEntity.getCode())
+                .handle((code, sink) -> {
+                    if (code != null) {
+                        sink.error(new ResponseStatusException(HttpStatus.CONFLICT, "This code has already exist"));
+                    }
+                    promoCodeRepository.create(promoEntity);
+                    sink.next(promoEntity);
+        });
     }
 
-    public PromoEntity update(PromoEntity promoEntity) {
+    public Mono<PromoEntity> update(PromoEntity promoEntity) {
         if (StringUtils.isBlank(promoEntity.getCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Code not be null");
         }
-        PromoEntity value = promoCodeRepository.getByCode(promoEntity.getCode());
-        if (value == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        promoCodeRepository.update(promoEntity);
-        return promoEntity;
+        return promoCodeRepository.getByCode(promoEntity.getCode())
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                .map(code -> {
+                    promoCodeRepository.update(promoEntity);
+                    return promoEntity;
+                });
     }
 
     public void delete(String code) {

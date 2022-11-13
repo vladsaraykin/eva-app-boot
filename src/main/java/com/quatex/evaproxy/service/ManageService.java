@@ -5,6 +5,7 @@ import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.repository.ManagerRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 public class ManageService {
@@ -22,9 +23,8 @@ public class ManageService {
         return value;
     }
 
-    public String getLink(Integer version) {
-        SettingEntity setting = managerRepository.getSetting();
-        return getValue(setting.getLink(), newVersion(setting.getVersion(), version));
+    public Mono<String> getLink(Integer version) {
+        return managerRepository.getSetting().map(setting -> getValue(setting.getLink(), newVersion(setting.getVersion(), version)));
     }
 
     public Integer updateEnabled(boolean newVersion, Integer value) {
@@ -33,22 +33,21 @@ public class ManageService {
         return value;
     }
 
-    public Integer getEnabled(Integer version) {
-        SettingEntity setting = managerRepository.getSetting();
-        return getValue(setting.getEnabled(), newVersion(setting.getVersion(), version));
+    public Mono<Integer> getEnabled(Integer version) {
+        return managerRepository.getSetting().map(setting -> getValue(setting.getEnabled(), newVersion(setting.getVersion(), version)));
     }
 
-    public Integer updateVersion(Integer version) {
+    public Mono<Integer> updateVersion(Integer version) {
         managerRepository.updateVersion(version);
-        return version;
+        return Mono.just(version);
     }
 
     public String updateLinkCryptoPay(String link) {
         return managerRepository.updateLinkCryptoPay(link);
     }
 
-    public String getLinkCryptoPay() {
-        return managerRepository.getSetting().getLinkCryptoPay();
+    public Mono<String> getLinkCryptoPay() {
+        return managerRepository.getSetting().map(SettingEntity::getLinkCryptoPay);
     }
 
     private <T> ManageEntity<T> valueFrom(boolean newVersion, T value) {

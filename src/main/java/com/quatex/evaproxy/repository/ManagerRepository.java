@@ -5,6 +5,7 @@ import com.quatex.evaproxy.entity.ManageEntity;
 import com.quatex.evaproxy.entity.SettingEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
 
@@ -24,35 +25,31 @@ public class ManagerRepository {
         store.store(SETTING_KEY, settingEntity);
     }
 
-    public SettingEntity getSetting() {
+    public Mono<SettingEntity> getSetting() {
         return store.getValueObj(SETTING_KEY);
     }
 
     public void updateLink(ManageEntity<String> newValue) {
         synchronized (store) {
-            SettingEntity setting = store.getValueObj(SETTING_KEY);
-            setting.setLink(remapping(newValue).apply(setting.getLink()));
+            store.getValueObj(SETTING_KEY).doOnNext(setting -> setting.setLink(remapping(newValue).apply(setting.getLink()))).subscribe();
         }
     }
 
     public void updateEnabled(ManageEntity<Integer> newValue) {
         synchronized (store) {
-            SettingEntity setting = store.getValueObj(SETTING_KEY);
-            setting.setEnabled(remapping(newValue).apply(setting.getEnabled()));
+            store.getValueObj(SETTING_KEY).doOnNext(setting -> remapping(newValue).apply(setting.getEnabled())).subscribe();
         }
     }
 
     public void updateVersion(Integer version) {
         synchronized (store) {
-            SettingEntity setting = store.getValueObj(SETTING_KEY);
-            setting.setVersion(version);
+            store.getValueObj(SETTING_KEY).doOnNext(setting -> setting.setVersion(version)).subscribe();
         }
     }
 
     public String updateLinkCryptoPay(String link) {
         synchronized (store) {
-            SettingEntity setting = store.getValueObj(SETTING_KEY);
-            setting.setLinkCryptoPay(link);
+            store.getValueObj(SETTING_KEY).doOnNext(setting -> setting.setLinkCryptoPay(link)).subscribe();
         }
         return link;
     }

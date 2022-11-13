@@ -9,11 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.util.List;
-
-@Schema
 @RestController
 @RequestMapping("promocode")
 public class PromoController {
@@ -30,8 +28,8 @@ public class PromoController {
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PromoEntity.class)) }) })
     @GetMapping("/list")
-    public ResponseEntity<List<PromoEntity>> getAll() {
-        return ResponseEntity.ok(promoCodesService.getAll());
+    public Flux<PromoEntity> getAll() {
+        return promoCodesService.getAll();
     }
 
     @Operation(summary = "Get promo code")
@@ -42,8 +40,8 @@ public class PromoController {
                     }),
             @ApiResponse(responseCode = "404", description = "Not found promo code")})
     @GetMapping("/{code}")
-    public ResponseEntity<PromoEntity> findByCode(@PathVariable(name = "code") String code) {
-        return ResponseEntity.ok(promoCodesService.getByCode(code));
+    public Mono<PromoEntity> findByCode(@PathVariable(name = "code") String code) {
+        return promoCodesService.getByCode(code);
     }
 
     @Operation(summary = "Create promo code")
@@ -55,8 +53,8 @@ public class PromoController {
             @ApiResponse(responseCode = "409", description = "Already exist"),
             @ApiResponse(responseCode = "400", description = "Code not be null")})
     @PostMapping("/create")
-    public ResponseEntity<PromoEntity> createCode(@RequestBody PromoEntity promoEntity) {
-        return ResponseEntity.ok(promoCodesService.create(promoEntity));
+    public Mono<PromoEntity> createCode(@RequestBody PromoEntity promoEntity) {
+        return promoCodesService.create(promoEntity);
     }
 
     @Operation(summary = "Update promo code")
@@ -67,8 +65,8 @@ public class PromoController {
                     }),
             @ApiResponse(responseCode = "404", description = "Code not be null")})
     @PostMapping("/update")
-    public ResponseEntity<PromoEntity> updateCode(@RequestBody PromoEntity promoEntity) {
-        return ResponseEntity.ok(promoCodesService.update(promoEntity));
+    public Mono<PromoEntity> updateCode(@RequestBody PromoEntity promoEntity) {
+        return promoCodesService.update(promoEntity);
     }
 
     @Operation(summary = "Delete promo code")

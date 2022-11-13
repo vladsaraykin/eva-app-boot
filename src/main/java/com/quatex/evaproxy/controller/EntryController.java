@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 public class EntryController {
@@ -34,12 +36,17 @@ public class EntryController {
                     })
     })
     @GetMapping("/entryData")
-    public ResponseEntity<EntryDataDto> getEntryData(@RequestParam(defaultValue = "1") Integer version) {
-        return ResponseEntity.ok(new EntryDataDto(
-                promoCodeService.getAll(),
+    public Mono<EntryDataDto> getEntryData(@RequestParam(defaultValue = "1") Integer version) {
+
+        return Mono.zip(
+                promoCodeService.getAll().collectList(),
                 manageService.getLink(version),
                 manageService.getLinkCryptoPay(),
-                manageService.getEnabled(version))
-        );
+                manageService.getEnabled(version)
+        ).map(data -> new EntryDataDto(
+                data.getT1(),
+                data.getT2(),
+                data.getT3(),
+                data.getT4()));
     }
 }

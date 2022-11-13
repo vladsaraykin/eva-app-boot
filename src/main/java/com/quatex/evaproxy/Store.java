@@ -1,6 +1,7 @@
 package com.quatex.evaproxy;
 
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,11 +18,11 @@ public class Store<K, V> {
         }
     }
 
-    public V getValueObj(K key) {
-        return store.get(key);
+    public Mono<V> getValueObj(K key) {
+        return Mono.justOrEmpty(store.get(key));
     }
 
-    public Map<K, Object> getStore() {
-        return Collections.unmodifiableMap(store);
+    public Mono<Map<K, Object>> getStore() {
+        return Mono.just(Collections.unmodifiableMap(store));
     }
 }
