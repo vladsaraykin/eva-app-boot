@@ -1,24 +1,24 @@
 package com.quatex.evaproxy.dto;
 
-import com.quatex.evaproxy.entity.PromoEntity;
+import com.quatex.evaproxy.entity.PromoCodeEntity;
 
 import java.util.List;
 
 public class EntryDataDto {
 
-    private final List<PromoEntity> promos;
+    private final List<PromoCodeEntity> promos;
     private final String link;
     private final String linkPay;
     private final Integer status;
 
-    public EntryDataDto(List<PromoEntity> promos, String link, String linkPay, Integer status) {
+    public EntryDataDto(List<PromoCodeEntity> promos, String link, String linkPay, Integer status) {
         this.promos = promos;
         this.link = link;
         this.linkPay = linkPay;
         this.status = status;
     }
 
-    public List<PromoEntity> getPromos() {
+    public List<PromoCodeEntity> getPromos() {
         return promos;
     }
 

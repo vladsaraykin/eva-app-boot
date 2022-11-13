@@ -1,21 +1,18 @@
 package com.quatex.evaproxy.controller;
 
-import com.quatex.evaproxy.Store;
+import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.service.KeitaroService;
 import com.quatex.evaproxy.service.ManageService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ua_parser.Client;
 import ua_parser.Parser;
 
-import java.util.Map;
+import java.net.InetSocketAddress;
 
 @RestController
 public class ManageController {
@@ -24,39 +21,26 @@ public class ManageController {
     private final Parser uaParser = new Parser();
     private final KeitaroService keitaroService;
     private final ManageService manageService;
-    private final Store<String, Object> store;
 
     public ManageController(KeitaroService keitaroService,
-                            Store<String, Object> store,
                             ManageService manageService) {
         this.keitaroService = keitaroService;
-        this.store = store;
         this.manageService = manageService;
     }
 
-
-    @PutMapping("enabled")
-    public Mono<String> changeEnabledStatus(@RequestParam(required = false) boolean newVersion,
-                                                      @RequestParam("enabled") Integer enabled) {
-        manageService.updateEnabled(newVersion, enabled);
-        return Mono.just("Enabled status set");
+    @GetMapping("settings")
+    public Mono<SettingEntity> getSettings() {
+        return manageService.getSetting();
     }
 
-    @PutMapping("link")
-    public Mono<String> changeLinkStatus(@RequestParam(required = false) boolean newVersion,
-                                                   @RequestParam("link") String link) {
-        manageService.updateLink(newVersion, link);
-        return Mono.just("success");
+    @PostMapping("settings")
+    public Mono<SettingEntity> updateSettings(@RequestBody SettingEntity settingEntity) {
+        return manageService.update(settingEntity);
     }
 
     @GetMapping("link")
     public Mono<String> getLink(@RequestParam(defaultValue = "1") Integer version) {
         return manageService.getLink(version);
-    }
-
-    @PutMapping("linkPay")
-    public Mono<String> changeLinkPay(@RequestParam("link") String link) {
-        return Mono.just(manageService.updateLinkCryptoPay(link));
     }
 
     @GetMapping("linkPay")
@@ -76,10 +60,14 @@ public class ManageController {
         String remoteAddr = request.getHeaders().getFirst("X-Forwarded-For");
         if (StringUtils.isBlank(remoteAddr)) {
             log.info("X-Forwarded-For is empty");
-            remoteAddr = request.getRemoteAddress().getAddress().toString();
+            InetSocketAddress remoteAddress = request.getRemoteAddress();
+            if (remoteAddress != null) {
+                remoteAddr = remoteAddress.getAddress().toString();
+            }
         }
 
         if (remoteAddr == null) {
+            log.warn("Remote address is null {}", request.getId());
             return Mono.just(0);
         }
 
@@ -108,15 +96,5 @@ public class ManageController {
                         sink.next(keitaroResponse);
                     }
                 });
-    }
-
-    @GetMapping("store")
-    public Mono<Map<String, Object>> getStore() {
-        return store.getStore();
-    }
-
-    @PutMapping("changeVersion")
-    public Mono<String> changeVersion(@RequestParam Integer version) {
-        return manageService.updateVersion(version).map(v -> "Success update version: " + version);
     }
 }

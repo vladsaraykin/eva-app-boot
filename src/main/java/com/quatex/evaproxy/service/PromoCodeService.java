@@ -1,6 +1,8 @@
 package com.quatex.evaproxy.service;
 
-import com.quatex.evaproxy.entity.PromoEntity;
+import com.datastax.oss.driver.api.core.CqlIdentifier;
+import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.quatex.evaproxy.entity.PromoCodeEntity;
 import com.quatex.evaproxy.repository.PromoCodeRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -9,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class PromoCodeService {
@@ -20,42 +22,39 @@ public class PromoCodeService {
         this.promoCodeRepository = promoCodeRepository;
     }
 
-    public Flux<PromoEntity> getAll() {
-        return promoCodeRepository.getAll();
+    public Flux<PromoCodeEntity> getAll() {
+        return promoCodeRepository.findAll();
     }
 
-    public Mono<PromoEntity> getByCode(String code) {
-        return promoCodeRepository.getByCode(code)
+    public Mono<PromoCodeEntity> getByCode(String code) {
+        return promoCodeRepository.findByCode(code)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
-    public Mono<PromoEntity> create(PromoEntity promoEntity) {
-        if (StringUtils.isBlank(promoEntity.getCode())) {
+    public Mono<PromoCodeEntity> create(PromoCodeEntity promoCodeEntity) {
+        if (StringUtils.isBlank(promoCodeEntity.getCode())) {
             return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Code not be null"));
         }
-        return promoCodeRepository.getByCode(promoEntity.getCode())
-                .handle((code, sink) -> {
-                    if (code != null) {
+        promoCodeEntity.setId(Uuids.timeBased());
+        return promoCodeRepository.findByCode(promoCodeEntity.getCode())
+                .<PromoCodeEntity>handle((exist, sink) -> {
+                    if (exist != null) {
                         sink.error(new ResponseStatusException(HttpStatus.CONFLICT, "This code has already exist"));
                     }
-                    promoCodeRepository.create(promoEntity);
-                    sink.next(promoEntity);
-        });
+                })
+                .switchIfEmpty(promoCodeRepository.save(promoCodeEntity));
     }
 
-    public Mono<PromoEntity> update(PromoEntity promoEntity) {
-        if (StringUtils.isBlank(promoEntity.getCode())) {
+    public Mono<PromoCodeEntity> update(PromoCodeEntity promoCodeEntity) {
+        if (StringUtils.isBlank(promoCodeEntity.getCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Code not be null");
         }
-        return promoCodeRepository.getByCode(promoEntity.getCode())
+        return promoCodeRepository.findByCode(promoCodeEntity.getCode())
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                .map(code -> {
-                    promoCodeRepository.update(promoEntity);
-                    return promoEntity;
-                });
+                .flatMap(code -> promoCodeRepository.save(promoCodeEntity));
     }
 
-    public void delete(String code) {
-        promoCodeRepository.delete(code);
+    public Mono<Void> delete(UUID uuid) {
+        return promoCodeRepository.deleteById(uuid);
     }
 }

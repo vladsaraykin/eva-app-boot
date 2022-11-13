@@ -1,0 +1,3 @@
+
+Запуск докер образа кассандры
+docker run --rm -p 9042:9042 -d --name cassandra cassandra;
