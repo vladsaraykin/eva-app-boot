@@ -1,51 +1,37 @@
 package com.quatex.evaproxy.entity;
 
-public class SettingEntity {
+import lombok.*;
+import org.springframework.data.cassandra.core.mapping.CassandraType;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
-    private ManageEntity<String> link;
-    private ManageEntity<Integer> enabled;
+import java.io.Serializable;
+
+@Table(value = "setting")
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class SettingEntity implements Serializable {
+
+    @PrimaryKey
+    private Integer id;
+
+    @CassandraType(type = CassandraType.Name.TUPLE, typeArguments = {
+            CassandraType.Name.TEXT,
+            CassandraType.Name.TEXT
+    })
+    private VersionStructure<String> link;
+
+    @CassandraType(type = CassandraType.Name.TUPLE, typeArguments = {
+            CassandraType.Name.INT,
+            CassandraType.Name.INT
+    })
+    private VersionStructure<Integer> enabled;
+
     private Integer version;
+
     private String linkCryptoPay;
 
-    public SettingEntity() {
-    }
-
-    public SettingEntity(ManageEntity<String> link, ManageEntity<Integer> enabled, Integer version, String linkCryptoPay) {
-        this.link = link;
-        this.enabled = enabled;
-        this.version = version;
-        this.linkCryptoPay = linkCryptoPay;
-    }
-
-    public String getLinkCryptoPay() {
-        return linkCryptoPay;
-    }
-
-    public ManageEntity<String> getLink() {
-        return link;
-    }
-
-    public void setLink(ManageEntity<String> link) {
-        this.link = link;
-    }
-
-    public ManageEntity<Integer> getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(ManageEntity<Integer> enabled) {
-        this.enabled = enabled;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
-    public void setLinkCryptoPay(String linkCryptoPay) {
-        this.linkCryptoPay = linkCryptoPay;
-    }
 }
