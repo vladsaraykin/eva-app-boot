@@ -91,10 +91,10 @@ public class ManageController {
                     if (keitaroResponse == 1) {
                         if (0 == enabled) {
                             sink.next(0);
+                            return;
                         }
-                    } else {
-                        sink.next(keitaroResponse);
                     }
+                    sink.next(keitaroResponse);
                 });
     }
 }

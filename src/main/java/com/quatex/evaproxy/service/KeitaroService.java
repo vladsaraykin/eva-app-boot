@@ -31,7 +31,7 @@ public class KeitaroService {
                                 .queryParam("model", model).build()
                 ).exchangeToMono(response -> {
                     if (response.statusCode().is2xxSuccessful()) {
-                        return response.bodyToMono(Integer.class);
+                        return response.bodyToMono(String.class).map(Integer::parseInt);
                     }
 
                     return response.createException().flatMap(Mono::error);
