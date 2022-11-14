@@ -27,16 +27,31 @@ public class ManageService {
 
     public Mono<String> getLink(Integer version) {
         return managerRepository.findById(ManagerRepository.ID)
-                .map(setting -> getValue(setting.getLink(), newVersion(setting.getVersion(), version)));
+                .handle((setting, sink) -> {
+                    final String value = getValue(setting.getLink(), newVersion(setting.getVersion(), version));
+                    if (value != null) {
+                        sink.next(value);
+                    }
+                });
     }
 
     public Mono<Integer> getEnabled(Integer version) {
         return managerRepository.findById(ManagerRepository.ID)
-                .map(setting -> getValue(setting.getEnabled(), newVersion(setting.getVersion(), version)));
+                .handle((setting, sink) -> {
+                    final Integer value = getValue(setting.getEnabled(), newVersion(setting.getVersion(), version));
+                    if (value != null) {
+                        sink.next(value);
+                    }
+                });
     }
 
     public Mono<String> getLinkCryptoPay() {
-        return managerRepository.findById(ManagerRepository.ID).map(SettingEntity::getLinkCryptoPay);
+        return managerRepository.findById(ManagerRepository.ID)
+                .handle((setting, sink) -> {
+                    if (setting.getLinkCryptoPay() != null) {
+                        sink.next(setting.getLinkCryptoPay());
+                    }
+                });
     }
 
     private <T> T getValue(VersionStructure<T> value, boolean newVersion) {

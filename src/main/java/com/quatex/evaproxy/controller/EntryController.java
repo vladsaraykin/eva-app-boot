@@ -37,9 +37,9 @@ public class EntryController {
 
         return Mono.zip(
                 promoCodeService.getAll().collectList(),
-                manageService.getLink(version),
-                manageService.getLinkCryptoPay(),
-                manageService.getEnabled(version)
+                manageService.getLink(version).defaultIfEmpty(""),
+                manageService.getLinkCryptoPay().defaultIfEmpty(""),
+                manageService.getEnabled(version).defaultIfEmpty(-1)
         ).map(data -> new EntryDataDto(
                 data.getT1(),
                 data.getT2(),
