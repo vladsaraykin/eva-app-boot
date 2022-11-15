@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class StartupApplicationListenerExample implements ApplicationListener<ContextRefreshedEvent> {
+public class StartupApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
 
     private final ManagerRepository managerRepository;
 

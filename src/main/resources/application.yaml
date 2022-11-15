@@ -1,0 +1,11 @@
+spring:
+  data:
+    cassandra:
+      config: classpath:keyspaces-application.conf
+      schema-action: CREATE_IF_NOT_EXISTS
+      keyspace-name: binomo
+      request:
+        consistency: local_quorum
+
+keitaroUrl: {{override}}
+defaultLink: {{override}}
