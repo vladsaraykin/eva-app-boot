@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{override_me}}-service
+spec:
+  selector:
+    app.kubernetes.io/name: {{override_me}}-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

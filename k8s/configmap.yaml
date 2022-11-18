@@ -1,5 +1,10 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: demo
+  name: {{override_me}}-configmap
 data:
+  application.yaml: |
+    spring.data.cassandra.keyspace-name: {{override_me}}
+
+    keitaroUrl: {{override_me}}
+    defaultLink: {{override_me}}
