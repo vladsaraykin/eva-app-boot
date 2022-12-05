@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.cassandra
+.k8s/contour/*
+.k8s/projects/*

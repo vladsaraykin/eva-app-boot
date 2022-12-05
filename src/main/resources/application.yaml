@@ -8,4 +8,3 @@ spring:
         consistency: local_quorum
 
 keitaroUrl: {{override_me}}
-defaultLink: {{override_me}}
