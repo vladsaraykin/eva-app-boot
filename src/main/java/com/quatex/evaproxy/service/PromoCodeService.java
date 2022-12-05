@@ -1,6 +1,5 @@
 package com.quatex.evaproxy.service;
 
-import com.datastax.oss.driver.api.core.CqlIdentifier;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.quatex.evaproxy.entity.PromoCodeEntity;
 import com.quatex.evaproxy.repository.PromoCodeRepository;
