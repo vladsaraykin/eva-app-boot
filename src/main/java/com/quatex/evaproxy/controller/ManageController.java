@@ -62,7 +62,7 @@ public class ManageController {
             log.info("X-Forwarded-For is empty");
             InetSocketAddress remoteAddress = request.getRemoteAddress();
             if (remoteAddress != null) {
-                remoteAddr = remoteAddress.getAddress().toString();
+                remoteAddr = remoteAddress.getAddress().getHostName();
             }
         }
 

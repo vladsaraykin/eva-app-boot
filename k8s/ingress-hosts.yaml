@@ -1,0 +1,15 @@
+# httpproxy.yaml
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: basic
+  namespace: {{override}}
+spec:
+  virtualhost:
+    fqdn: {{override}}
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: {{override}}
+          port: 8080

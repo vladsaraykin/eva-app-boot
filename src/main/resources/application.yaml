@@ -1,0 +1,10 @@
+spring:
+  data:
+    cassandra:
+      config: classpath:keyspaces-application.conf
+      schema-action: CREATE_IF_NOT_EXISTS
+      keyspace-name: {{override_me}}
+      request:
+        consistency: local_quorum
+
+keitaroUrl: {{override_me}}
