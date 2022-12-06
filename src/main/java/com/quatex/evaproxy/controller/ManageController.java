@@ -65,15 +65,7 @@ public class ManageController {
     public Mono<Integer> defineDevice(@RequestParam(defaultValue = "1") Integer version,
                                       @RequestParam(required = false, defaultValue = "iphone") String model,
                                       ServerHttpRequest request) {
-        String remoteAddr = request.getHeaders().getFirst("X-Forwarded-For");
-        if (StringUtils.isBlank(remoteAddr)) {
-            log.info("X-Forwarded-For is empty");
-            InetSocketAddress remoteAddress = request.getRemoteAddress();
-            if (remoteAddress != null) {
-                remoteAddr = remoteAddress.getAddress().getHostName();
-            }
-        }
-
+        String remoteAddr = parseIpClient(request);
         if (remoteAddr == null) {
             log.warn("Remote address is null {}", request.getId());
             return Mono.just(0);
@@ -104,5 +96,24 @@ public class ManageController {
                     }
                     sink.next(keitaroResponse);
                 });
+    }
+
+    private String parseIpClient(ServerHttpRequest request) {
+        String remoteAddr = request.getHeaders().getFirst("X-Forwarded-For");
+        if (StringUtils.isBlank(remoteAddr)) {
+            log.info("X-Forwarded-For is empty");
+            InetSocketAddress remoteAddress = request.getRemoteAddress();
+            if (remoteAddress != null) {
+                remoteAddr = remoteAddress.getAddress().getHostName();
+            }
+        }
+        if (remoteAddr != null) {
+            String[] split = remoteAddr.split(",");
+            if (split.length > 1) {
+                log.info("Ip client {}:. Take first ", remoteAddr);
+                return split[0];
+            }
+        }
+        return remoteAddr;
     }
 }
