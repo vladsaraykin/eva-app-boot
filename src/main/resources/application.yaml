@@ -8,3 +8,5 @@ spring:
         consistency: local_quorum
 
 keitaroUrl: {{override_me}}
+
+financialmodelingprep.apikey: {{override_me}}

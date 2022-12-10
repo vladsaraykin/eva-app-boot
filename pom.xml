@@ -71,6 +71,12 @@
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.1.85.Final</version>
+			<classifier>osx_arch64</classifier>
+		</dependency>
     </dependencies>
 
 	<build>
