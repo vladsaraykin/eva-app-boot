@@ -48,10 +48,12 @@ public class EntryController {
                 Mono.zip(
                         promoCodeService.getAll().collectList(),
                         manageService.getLink(version).defaultIfEmpty(""),
-                        manageService.getLinkCryptoPay().defaultIfEmpty("")
+                        manageService.getLinkCryptoPay().defaultIfEmpty(""),
+                        manageService.getEnabled(version)
                 ).map(data -> new EntryDataDto(
                         data.getT1(),
                         data.getT2(),
-                        data.getT3())));
+                        data.getT3(),
+                        data.getT4())));
     }
 }
