@@ -1,9 +1,11 @@
 package com.quatex.evaproxy.dto;
 
 import com.quatex.evaproxy.entity.PromoCodeEntity;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class EntryDataDto {
 
     private final List<PromoCodeEntity> promos;
@@ -16,18 +18,6 @@ public class EntryDataDto {
         this.link = link;
         this.linkPay = linkPay;
         this.status = status;
-    }
-
-    public List<PromoCodeEntity> getPromos() {
-        return promos;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public String getLinkPay() {
-        return linkPay;
     }
 
 }
