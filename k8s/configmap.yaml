@@ -10,3 +10,7 @@ data:
           keyspace-name: {{override}}
 
     keitaroUrl:{{override}}
+    financialmodelingprep.apikey: {{override}}
+    onesignal:
+      apiKey: {{override}}
+      appId: {{override}}

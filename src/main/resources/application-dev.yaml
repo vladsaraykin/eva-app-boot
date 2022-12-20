@@ -1,6 +1,4 @@
-
 keitaroUrl: test
-defaultLink: test
 
 spring:
   data:
@@ -9,3 +7,8 @@ spring:
       port: 9042
       local-datacenter: datacenter1
       schema-action: CREATE_IF_NOT_EXISTS
+
+financialmodelingprep.apikey: test
+onesignal:
+  apiKey: test
+  appId: test

@@ -16,7 +16,6 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
 
     private final ManagerRepository managerRepository;
     private final EconomicCalendarScheduled economicCalendarScheduled;
-
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         managerRepository.findAll()
@@ -26,7 +25,7 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
                                 .version(1)
                                 .build()
                 )).subscribe();
-        log.info("Synchronize economic events");
+
         economicCalendarScheduled.synchronizeEconomicEvents();
     }
 }
