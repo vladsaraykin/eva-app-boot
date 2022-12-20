@@ -8,3 +8,12 @@ spring:
         consistency: local_quorum
 
 keitaroUrl: {{override_me}}
+
+financialmodelingprep.apikey: {{override_me}}
+onesignal:
+  apiKey: {{override_me}}
+  appId: {{override_me}}
+
+notification:
+  prefixes: 🔺,💰,📊, 💥
+  headerMessage: '⏱ New event in 10 minutes ⚠️'
