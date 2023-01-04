@@ -17,3 +17,5 @@ onesignal:
 notification:
   prefixes: 🔺,💰,📊, 💥
   headerMessage: '⏱ New event in 10 minutes ⚠️'
+
+token: qwerty321
