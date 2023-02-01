@@ -6,6 +6,7 @@ import com.quatex.evaproxy.entity.EventEntity;
 import com.quatex.evaproxy.repository.EventRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,9 @@ public class PartnerEventController {
                                            @RequestParam(name = "reg", required = false) Boolean registration,
                                            @RequestParam(name = "ftd", required = false) Boolean fistReplenishment) {
         log.info("Received eventId:{}", eventId);
+        if (StringUtils.isBlank(clickId)) {
+            log.info("ClickId is empty for eventId {}", eventId);
+        }
         EventEntity.EventEntityBuilder eventEntityBuilder = EventEntity.builder()
                 .clickId(clickId)
                 .status(status)
