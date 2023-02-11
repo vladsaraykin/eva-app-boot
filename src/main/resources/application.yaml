@@ -11,7 +11,7 @@ keitaroUrl: {{override_me}}
 
 financialmodelingprep.apikey: {{override_me}}
 onesignal:
-  apiKey: {{override_me}}
+  apiKey:
   appId: {{override_me}}
 
 notification:

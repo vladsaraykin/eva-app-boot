@@ -1,7 +1,11 @@
-package com.quatex.evaproxy.service;
+package com.quatex.evaproxy.service.impl;
 
 import com.quatex.evaproxy.dto.onesignal.OneSignalPushDto;
+import com.quatex.evaproxy.service.NotificationService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -11,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@ConditionalOnExpression(value = "!'${onesignal.apiKey}'.equals('')")
 public class OneSignalNotification implements NotificationService {
 
     private final WebClient webClient;
