@@ -32,10 +32,11 @@ public class PartnerEventController {
     private final String tokenAccess;
 
     public PartnerEventController(EventRepository eventRepository,
-                          @Value("${token}") String tokenAccess) {
+                                  @Value("${token}") String tokenAccess) {
         this.eventRepository = eventRepository;
         this.tokenAccess = tokenAccess;
     }
+
     @Operation(summary = "Store event from partner service (postback)")
     @GetMapping("/storeEvent") // GET because service integration doesn't support other http methods
     public Mono<EventEntity> registerEvent(@RequestParam("cid") String clickId,
@@ -47,34 +48,34 @@ public class PartnerEventController {
         if (StringUtils.isBlank(clickId)) {
             log.info("ClickId is empty for eventId {}", eventId);
         }
-        EventEntity.EventEntityBuilder eventEntityBuilder = EventEntity.builder()
-                .clickId(clickId)
-                .status(status)
-                .registration(registration)
-                .fistReplenishment(fistReplenishment);
         return eventRepository.findByClickId(clickId)
                 .switchIfEmpty(
-                        eventRepository.save(eventEntityBuilder
-                                .id(Uuids.timeBased())
-                                .created(LocalDateTime.now(ZoneOffset.UTC)).build())
+                        eventRepository.save(EventEntity.builder()
+                                        .id(Uuids.timeBased())
+                                        .clickId(clickId)
+                                        .created(LocalDateTime.now(ZoneOffset.UTC)).build())
+                                .doOnSuccess(e -> log.info("Store new user with click: {}", clickId))
                 ).flatMap(eventEntityDb -> {
-                    EventEntity newEvent = eventEntityBuilder.id(eventEntityDb.getId()).build();
-                    if (!newEvent.equals(eventEntityDb)) {
-                        if (registration != null) {
-                            eventEntityDb.setRegistration(registration);
-                        }
-                        if (fistReplenishment != null) {
-                            eventEntityDb.setFistReplenishment(fistReplenishment);
-                        }
-                        if (status != null) {
-                            eventEntityDb.setStatus(status);
-                        }
-                        eventEntityDb.setLastChangeUpdated(LocalDateTime.now(ZoneOffset.UTC));
-                        return eventRepository.save(eventEntityDb);
+                    boolean needStore = false;
+                    if (registration != null) {
+                        needStore = true;
+                        eventEntityDb.setRegistration(registration);
                     }
-                    return Mono.just(newEvent);
-                })
-                .doOnSuccess(event -> log.info("Event registered or updated: {}", event));
+                    if (fistReplenishment != null) {
+                        needStore = true;
+                        eventEntityDb.setFistReplenishment(fistReplenishment);
+                    }
+                    if (status != null) {
+                        needStore = true;
+                        eventEntityDb.setStatus(status);
+                    }
+                    if (needStore) {
+                        eventEntityDb.setLastChangeUpdated(LocalDateTime.now(ZoneOffset.UTC));
+                        log.info("Event updated: {}", eventEntityDb);
+                    }
+
+                    return needStore ? eventRepository.save(eventEntityDb) : Mono.just(eventEntityDb);
+                });
     }
 
     @Operation(summary = "Store event from partner service")

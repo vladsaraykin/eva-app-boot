@@ -5,5 +5,5 @@ docker run --rm -p 9042:9042 -d --name cassandra cassandra
 Публикация образа в облаке
 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/j6m7r3t6
 docker build -t eva .
-docker tag eva:latest public.ecr.aws/j6m7r3t6/eva:1.3.2-arm64
-docker push public.ecr.aws/j6m7r3t6/eva:1.3.2-arm64
+docker tag eva:latest public.ecr.aws/j6m7r3t6/eva:1.3.3-arm64
+docker push public.ecr.aws/j6m7r3t6/eva:1.3.3-arm64
