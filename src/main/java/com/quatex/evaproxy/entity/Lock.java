@@ -6,7 +6,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
-import static com.quatex.evaproxy.AppConfig.LOCK_TABLE_NAME;
+import static com.quatex.evaproxy.config.AppConfig.LOCK_TABLE_NAME;
 
 @Table(value = LOCK_TABLE_NAME)
 @Builder

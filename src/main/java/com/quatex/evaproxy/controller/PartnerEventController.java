@@ -47,6 +47,7 @@ public class PartnerEventController {
         log.info("Received eventId:{}", eventId);
         if (StringUtils.isBlank(clickId)) {
             log.info("ClickId is empty for eventId {}", eventId);
+            return Mono.empty();
         }
         return eventRepository.findByClickId(clickId)
                 .switchIfEmpty(
@@ -78,7 +79,15 @@ public class PartnerEventController {
                 });
     }
 
-    @Operation(summary = "Store event from partner service")
+    @Operation(summary = "Get click data")
+    @GetMapping("/partnerEvent")
+    public Mono<PartnerEventDto> getPartnerEventDto(@RequestParam String clickId) {
+        return eventRepository.findByClickId(clickId)
+                .map(this::mapToPartnerEventDto)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+    }
+
+    @Operation(summary = "Get click data")
     @GetMapping("/clickData")
     public Mono<Map<String, Boolean>> getClickData(@RequestParam String clickId) {
         return eventRepository.findByClickId(clickId)
@@ -89,7 +98,7 @@ public class PartnerEventController {
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
-    @Operation(summary = "Get list events")
+    @Operation(summary = "Get list events", hidden = true)
     @GetMapping("/events")
     public Flux<PartnerEventDto> getEvents(@RequestParam(defaultValue = "50", required = false) Integer limit,
                                            @RequestParam(defaultValue = "0", required = false) Integer offset) {
