@@ -40,13 +40,12 @@ public class PartnerEventController {
     @Operation(summary = "Store event from partner service (postback)")
     @GetMapping("/storeEvent") // GET because service integration doesn't support other http methods
     public Mono<EventEntity> registerEvent(@RequestParam("cid") String clickId,
-                                           @RequestParam("eid") String eventId,
+                                           @RequestParam(value = "eid", required = false) String eventId,
                                            @RequestParam(name = "status", required = false) String status,
                                            @RequestParam(name = "reg", required = false) Boolean registration,
                                            @RequestParam(name = "ftd", required = false) Boolean fistReplenishment) {
-        log.info("Received eventId:{}", eventId);
         if (StringUtils.isBlank(clickId)) {
-            log.info("ClickId is empty for eventId {}", eventId);
+            log.warn("ClickId is empty for eventId {}", eventId);
             return Mono.empty();
         }
         return eventRepository.findByClickId(clickId)
