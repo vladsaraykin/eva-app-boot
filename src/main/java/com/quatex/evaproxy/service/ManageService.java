@@ -1,5 +1,6 @@
 package com.quatex.evaproxy.service;
 
+import com.quatex.evaproxy.dto.SettingDto;
 import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.entity.VersionStructure;
 import com.quatex.evaproxy.repository.ManagerRepository;
@@ -23,6 +24,15 @@ public class ManageService {
     public Mono<SettingEntity> update(SettingEntity settingEntity) {
         settingEntity.setId(ManagerRepository.ID);
         return managerRepository.save(settingEntity);
+    }
+
+    public Mono<SettingDto> getSettings(Integer version) {
+        return managerRepository.findById(ManagerRepository.ID)
+                .map(entity -> SettingDto.builder()
+                        .enabled(getValue(entity.getEnabled(), newVersion(entity.getVersion(), version)))
+                        .link(getValue(entity.getLink(), newVersion(entity.getVersion(), version)))
+                        .linkCryptoPay(entity.getLinkCryptoPay())
+                        .build());
     }
 
     public Mono<String> getLink(Integer version) {

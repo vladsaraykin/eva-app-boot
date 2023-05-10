@@ -5,7 +5,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.service.KeitaroService;
 import com.quatex.evaproxy.service.ManageService;
-import com.quatex.evaproxy.utils.CacheUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +83,7 @@ public class ManageController {
                 " actualModel: {} ;", remoteAddr, name, systemVersion, model, actualModel);
 
         return keitaroService.getStatus(remoteAddr, name, systemVersion, model)
-                .zipWhen(res -> CacheUtils.getCacheValue(versionCache, version, manageService.getEnabled(version)))
+                .zipWhen(res -> manageService.getEnabled(version))
                 .handle((data, sink) -> {
                     final Integer keitaroResponse = data.getT1();
                     final Integer enabled = data.getT2();
