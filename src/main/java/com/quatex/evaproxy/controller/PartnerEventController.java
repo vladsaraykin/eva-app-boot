@@ -40,15 +40,16 @@ public class PartnerEventController {
     @Operation(summary = "Store event from partner service (postback)")
     @GetMapping("/storeEvent") // GET because service integration doesn't support other http methods
     public Mono<EventEntity> registerEvent(@RequestParam("cid") String clickId,
-                                           @RequestParam("eid") String eventId,
+                                           @RequestParam(value = "eid", required = false) String eventId,
                                            @RequestParam(name = "status", required = false) String status,
                                            @RequestParam(name = "reg", required = false) Boolean registration,
                                            @RequestParam(name = "ftd", required = false) Boolean fistReplenishment) {
-        log.info("Received eventId:{}", eventId);
         if (StringUtils.isBlank(clickId)) {
             log.info("ClickId is empty for eventId {}", eventId);
+            return Mono.empty();
         }
         return eventRepository.findByClickId(clickId)
+                .next()
                 .switchIfEmpty(
                         eventRepository.save(EventEntity.builder()
                                         .id(Uuids.timeBased())
@@ -78,10 +79,20 @@ public class PartnerEventController {
                 });
     }
 
-    @Operation(summary = "Store event from partner service")
+    @Operation(summary = "Get click data")
+    @GetMapping("/partnerEvent")
+    public Mono<PartnerEventDto> getPartnerEventDto(@RequestParam String clickId) {
+        return eventRepository.findByClickId(clickId)
+                .next()
+                .map(this::mapToPartnerEventDto)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+    }
+
+    @Operation(summary = "Get click data")
     @GetMapping("/clickData")
     public Mono<Map<String, Boolean>> getClickData(@RequestParam String clickId) {
         return eventRepository.findByClickId(clickId)
+                .next()
                 .<Map<String, Boolean>>handle((eventEntity, sink) -> sink.next(Map.of(
                         "registration", Optional.ofNullable(eventEntity.getRegistration()).orElse(false),
                         "firstReplenishment", Optional.ofNullable(eventEntity.getFistReplenishment()).orElse(false)
