@@ -89,15 +89,6 @@ public class PartnerEventController {
     }
 
     @Operation(summary = "Get click data")
-    @Operation(summary = "Get click data")
-    @GetMapping("/partnerEvent")
-    public Mono<PartnerEventDto> getPartnerEventDto(@RequestParam String clickId) {
-        return eventRepository.findByClickId(clickId)
-                .map(this::mapToPartnerEventDto)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
-    }
-
-    @Operation(summary = "Get click data")
     @GetMapping("/clickData")
     public Mono<Map<String, Boolean>> getClickData(@RequestParam String clickId) {
         return eventRepository.findByClickId(clickId)

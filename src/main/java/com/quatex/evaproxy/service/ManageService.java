@@ -37,8 +37,8 @@ public class ManageService {
     public Mono<SettingDto> getSettings(Integer version) {
         return managerRepository.findById(ManagerRepository.ID)
                 .map(entity -> SettingDto.builder()
-                        .enabled(getValue(entity.getEnabled(), newVersion(entity.getVersion(), version)))
-                        .link(getValue(entity.getLink(), newVersion(entity.getVersion(), version)))
+                        .enabled(getValue(entity.getEnabled(), isNewVersion(entity.getVersion(), version)))
+                        .link(getValue(entity.getLink(), isNewVersion(entity.getVersion(), version)))
                         .linkCryptoPay(entity.getLinkCryptoPay())
                         .build());
     }
