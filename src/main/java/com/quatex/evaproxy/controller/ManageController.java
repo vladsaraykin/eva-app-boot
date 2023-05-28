@@ -1,7 +1,5 @@
 package com.quatex.evaproxy.controller;
 
-import com.github.benmanes.caffeine.cache.AsyncCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.service.KeitaroService;
 import com.quatex.evaproxy.service.ManageService;
@@ -15,7 +13,6 @@ import ua_parser.Client;
 import ua_parser.Parser;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 public class ManageController {
@@ -24,15 +21,11 @@ public class ManageController {
     private final Parser uaParser = new Parser();
     private final KeitaroService keitaroService;
     private final ManageService manageService;
-    private final AsyncCache<Integer, Integer> versionCache;
 
     public ManageController(KeitaroService keitaroService,
                             ManageService manageService) {
         this.keitaroService = keitaroService;
         this.manageService = manageService;
-        this.versionCache = Caffeine.newBuilder()
-                .expireAfterWrite(30, TimeUnit.SECONDS)
-                .buildAsync();
     }
 
     @GetMapping("settings")

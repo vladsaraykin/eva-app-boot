@@ -68,10 +68,6 @@
 			<version>2.1.6</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>net.javacrumbs.shedlock</groupId>
 			<artifactId>shedlock-provider-cassandra</artifactId>
 			<version>5.0.1</version>

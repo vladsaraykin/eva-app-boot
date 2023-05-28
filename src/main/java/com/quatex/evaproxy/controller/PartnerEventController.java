@@ -49,6 +49,7 @@ public class PartnerEventController {
             return Mono.empty();
         }
         return eventRepository.findByClickId(clickId)
+                .next()
                 .switchIfEmpty(
                         eventRepository.save(EventEntity.builder()
                                         .id(Uuids.timeBased())
@@ -82,6 +83,16 @@ public class PartnerEventController {
     @GetMapping("/partnerEvent")
     public Mono<PartnerEventDto> getPartnerEventDto(@RequestParam String clickId) {
         return eventRepository.findByClickId(clickId)
+                .next()
+                .map(this::mapToPartnerEventDto)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+    }
+
+    @Operation(summary = "Get click data")
+    @Operation(summary = "Get click data")
+    @GetMapping("/partnerEvent")
+    public Mono<PartnerEventDto> getPartnerEventDto(@RequestParam String clickId) {
+        return eventRepository.findByClickId(clickId)
                 .map(this::mapToPartnerEventDto)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
@@ -90,6 +101,7 @@ public class PartnerEventController {
     @GetMapping("/clickData")
     public Mono<Map<String, Boolean>> getClickData(@RequestParam String clickId) {
         return eventRepository.findByClickId(clickId)
+                .next()
                 .<Map<String, Boolean>>handle((eventEntity, sink) -> sink.next(Map.of(
                         "registration", Optional.ofNullable(eventEntity.getRegistration()).orElse(false),
                         "firstReplenishment", Optional.ofNullable(eventEntity.getFistReplenishment()).orElse(false)

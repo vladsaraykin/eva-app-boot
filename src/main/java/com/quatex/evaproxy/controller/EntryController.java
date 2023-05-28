@@ -18,7 +18,6 @@ public class EntryController {
 
     private final PromoCodeService promoCodeService;
     private final ManageService manageService;
-
     public EntryController(PromoCodeService promoCodeService, ManageService manageService) {
         this.promoCodeService = promoCodeService;
         this.manageService = manageService;
