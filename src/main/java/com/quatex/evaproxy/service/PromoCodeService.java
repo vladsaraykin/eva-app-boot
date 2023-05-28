@@ -10,24 +10,34 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class PromoCodeService {
 
     private final PromoCodeRepository promoCodeRepository;
-
+    private final ConcurrentHashMap<String, PromoCodeEntity> cache = new ConcurrentHashMap<>();
     public PromoCodeService(PromoCodeRepository promoCodeRepository) {
         this.promoCodeRepository = promoCodeRepository;
     }
 
     public Flux<PromoCodeEntity> getAll() {
-        return promoCodeRepository.findAll();
+        return Flux.fromIterable(cache.values())
+                .switchIfEmpty(
+                        promoCodeRepository.findAll().doOnNext(e -> cache.put(e.getCode(), e))
+                );
     }
 
     public Mono<PromoCodeEntity> getByCode(String code) {
-        return promoCodeRepository.findByCode(code)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+        PromoCodeEntity promoCodeEntity = cache.get(code);
+        if (promoCodeEntity == null) {
+            return promoCodeRepository.findByCode(code)
+                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                    .doOnSuccess(e -> cache.put(e.getCode(), e));
+        }
+        return Mono.just(promoCodeEntity);
     }
 
     public Mono<PromoCodeEntity> create(PromoCodeEntity promoCodeEntity) {
@@ -41,7 +51,8 @@ public class PromoCodeService {
                         sink.error(new ResponseStatusException(HttpStatus.CONFLICT, "This code has already exist"));
                     }
                 })
-                .switchIfEmpty(promoCodeRepository.save(promoCodeEntity));
+                .switchIfEmpty(promoCodeRepository.save(promoCodeEntity))
+                .doOnSuccess(e -> cache.put(e.getCode(), e));
     }
 
     public Mono<PromoCodeEntity> update(PromoCodeEntity promoCodeEntity) {
@@ -50,10 +61,13 @@ public class PromoCodeService {
         }
         return promoCodeRepository.findByCode(promoCodeEntity.getCode())
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
-                .flatMap(code -> promoCodeRepository.save(promoCodeEntity));
+                .flatMap(code -> promoCodeRepository.save(promoCodeEntity))
+                .doOnSuccess(e -> cache.put(e.getCode(), e));
     }
 
     public Mono<Void> delete(UUID uuid) {
-        return promoCodeRepository.deleteById(uuid);
+        return promoCodeRepository.findById(uuid)
+                .doOnSuccess(e -> cache.remove(e.getCode()))
+                .flatMap(e -> promoCodeRepository.deleteById(uuid));
     }
 }
