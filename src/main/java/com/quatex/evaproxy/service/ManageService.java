@@ -39,13 +39,13 @@ public class ManageService {
             return managerRepository.findById(ManagerRepository.ID)
                     .doOnSuccess(e -> cache.put(e.getId(), e))
                     .handle((setting, sink) -> {
-                        final String value = getValue(setting.getLink(), newVersion(setting.getVersion(), version));
+                        final String value = getValue(setting.getLink(), isNewVersion(setting.getVersion(), version));
                         if (value != null) {
                             sink.next(value);
                         }
                     });
         }
-        String value = getValue(settingEntity.getLink(), newVersion(settingEntity.getVersion(), version));
+        String value = getValue(settingEntity.getLink(), isNewVersion(settingEntity.getVersion(), version));
         return value != null ? Mono.just(value) : Mono.empty();
     }
 
@@ -55,13 +55,13 @@ public class ManageService {
             return managerRepository.findById(ManagerRepository.ID)
                     .doOnSuccess(e -> cache.put(e.getId(), e))
                     .handle((setting, sink) -> {
-                        final Integer value = getValue(setting.getEnabled(), newVersion(setting.getVersion(), version));
+                        final Integer value = getValue(setting.getEnabled(), isNewVersion(setting.getVersion(), version));
                         if (value != null) {
                             sink.next(value);
                         }
                     });
         }
-        Integer value = getValue(settingEntity.getEnabled(), newVersion(settingEntity.getVersion(), version));
+        Integer value = getValue(settingEntity.getEnabled(), isNewVersion(settingEntity.getVersion(), version));
         return value != null ? Mono.just(value) : Mono.empty();
 
     }
@@ -87,7 +87,7 @@ public class ManageService {
         return newVersion ? value.getNewValue() : value.getCurrentValue();
     }
 
-    private boolean newVersion(@NonNull Integer currentVersion, Integer version) {
+    private boolean isNewVersion(@NonNull Integer currentVersion, Integer version) {
         return version > currentVersion;
     }
 }
