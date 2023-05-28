@@ -2,13 +2,16 @@ keitaroUrl: test
 
 spring:
   data:
-    cassandra:
-      keyspace-name: evaapp
-      port: 9042
-      local-datacenter: datacenter1
-      schema-action: CREATE_IF_NOT_EXISTS
+#    cassandra:
+#      keyspace-name: evaapp
+#      port: 9042
+#      local-datacenter: datacenter1
+#      schema-action: CREATE_IF_NOT_EXISTS
+#      request:
+#        consistency: local_quorum
 
 financialmodelingprep.apikey: test
+
 onesignal:
   apiKey: test
   appId: test

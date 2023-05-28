@@ -1,4 +1,4 @@
-package com.quatex.evaproxy;
+package com.quatex.evaproxy.config;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import io.netty.channel.ChannelOption;

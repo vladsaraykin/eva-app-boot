@@ -34,13 +34,12 @@ public class EntryController {
     public Mono<EntryDataDto> getEntryData(@RequestParam(defaultValue = "1") Integer version) {
         return Mono.zip(
                 promoCodeService.getAll().collectList(),
-                manageService.getLink(version).defaultIfEmpty(""),
-                manageService.getLinkCryptoPay().defaultIfEmpty(""),
-                manageService.getEnabled(version)
+                manageService.getSettings(version)
         ).map(data -> new EntryDataDto(
                 data.getT1(),
-                data.getT2(),
-                data.getT3(),
-                data.getT4()));
+                data.getT2().getLink(),
+                data.getT2().getLinkCryptoPay(),
+                data.getT2().getEnabled()
+        ));
     }
 }

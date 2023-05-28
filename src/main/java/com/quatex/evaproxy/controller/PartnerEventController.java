@@ -45,7 +45,7 @@ public class PartnerEventController {
                                            @RequestParam(name = "reg", required = false) Boolean registration,
                                            @RequestParam(name = "ftd", required = false) Boolean fistReplenishment) {
         if (StringUtils.isBlank(clickId)) {
-            log.info("ClickId is empty for eventId {}", eventId);
+            log.warn("ClickId is empty for eventId {}", eventId);
             return Mono.empty();
         }
         return eventRepository.findByClickId(clickId)
@@ -100,7 +100,7 @@ public class PartnerEventController {
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
-    @Operation(summary = "Get list events")
+    @Operation(summary = "Get list events", hidden = true)
     @GetMapping("/events")
     public Flux<PartnerEventDto> getEvents(@RequestParam(defaultValue = "50", required = false) Integer limit,
                                            @RequestParam(defaultValue = "0", required = false) Integer offset) {
