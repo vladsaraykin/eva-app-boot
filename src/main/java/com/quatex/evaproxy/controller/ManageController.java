@@ -1,11 +1,8 @@
 package com.quatex.evaproxy.controller;
 
-import com.github.benmanes.caffeine.cache.AsyncCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.service.KeitaroService;
 import com.quatex.evaproxy.service.ManageService;
-import com.quatex.evaproxy.utils.CacheUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +13,6 @@ import ua_parser.Client;
 import ua_parser.Parser;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 public class ManageController {
@@ -25,15 +21,11 @@ public class ManageController {
     private final Parser uaParser = new Parser();
     private final KeitaroService keitaroService;
     private final ManageService manageService;
-    private final AsyncCache<Integer, Integer> versionCache;
 
     public ManageController(KeitaroService keitaroService,
                             ManageService manageService) {
         this.keitaroService = keitaroService;
         this.manageService = manageService;
-        this.versionCache = Caffeine.newBuilder()
-                .expireAfterWrite(30, TimeUnit.SECONDS)
-                .buildAsync();
     }
 
     @GetMapping("settings")
@@ -84,7 +76,7 @@ public class ManageController {
                 " actualModel: {} ;", remoteAddr, name, systemVersion, model, actualModel);
 
         return keitaroService.getStatus(remoteAddr, name, systemVersion, model)
-                .zipWhen(res -> CacheUtils.getCacheValue(versionCache, version, manageService.getEnabled(version)))
+                .zipWhen(res -> manageService.getEnabled(version))
                 .handle((data, sink) -> {
                     final Integer keitaroResponse = data.getT1();
                     final Integer enabled = data.getT2();
