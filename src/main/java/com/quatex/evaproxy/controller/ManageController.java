@@ -13,6 +13,7 @@ import ua_parser.Client;
 import ua_parser.Parser;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 @RestController
 public class ManageController {
@@ -51,6 +52,11 @@ public class ManageController {
     @GetMapping("enabled")
     public Mono<Integer> enabled(@RequestParam(defaultValue = "1") Integer version) {
         return manageService.getEnabled(version);
+    }
+
+    @PostMapping("createAlert")
+    public Mono<String> createAlert(@RequestBody Map<String, Object> o) {
+        return Mono.just("success");
     }
 
     @GetMapping("status")
