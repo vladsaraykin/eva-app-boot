@@ -6,7 +6,12 @@ spring:
       keyspace-name: {{override_me}}
       request:
         consistency: local_quorum
-
+  r2dbc:
+    url: r2dbc:postgresql://{{override_me}}
+    username: {{override_me}}
+    password: {{override_me}}
+    properties:
+      schema: {{override_me}}
 keitaroUrl: {{override_me}}
 
 financialmodelingprep.apikey: {{override_me}}
