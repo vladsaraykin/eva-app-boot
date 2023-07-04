@@ -1,6 +1,7 @@
 package com.quatex.evaproxy.config;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.quatex.evaproxy.keitaro.config.KeitaroAutoConfiguration;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -16,6 +17,7 @@ import net.javacrumbs.shedlock.provider.cassandra.CassandraLockProvider.Configur
 import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.springframework.boot.autoconfigure.cassandra.CassandraProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.config.EnableWebFlux;
@@ -28,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 @EnableScheduling
 @EnableSchedulerLock(defaultLockAtMostFor = "10s")
 @EnableWebFlux
+@Import(KeitaroAutoConfiguration.class)
 @org.springframework.context.annotation.Configuration
 public class AppConfig {
 

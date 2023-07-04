@@ -1,9 +1,9 @@
 package com.quatex.evaproxy.controller;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.quatex.evaproxy.keitaro.entity.PartnerEventEntity;
+import com.quatex.evaproxy.keitaro.repository.PartnerEventRepository;
 import com.quatex.evaproxy.dto.PartnerEventDto;
-import com.quatex.evaproxy.entity.EventEntity;
-import com.quatex.evaproxy.repository.EventRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,10 +28,10 @@ import java.util.UUID;
 @RequestMapping("partnerevents")
 public class PartnerEventController {
 
-    private final EventRepository eventRepository;
+    private final PartnerEventRepository eventRepository;
     private final String tokenAccess;
 
-    public PartnerEventController(EventRepository eventRepository,
+    public PartnerEventController(PartnerEventRepository eventRepository,
                                   @Value("${token}") String tokenAccess) {
         this.eventRepository = eventRepository;
         this.tokenAccess = tokenAccess;
@@ -39,11 +39,11 @@ public class PartnerEventController {
 
     @Operation(summary = "Store event from partner service (postback)")
     @GetMapping("/storeEvent") // GET because service integration doesn't support other http methods
-    public Mono<EventEntity> registerEvent(@RequestParam("cid") String clickId,
-                                           @RequestParam(value = "eid", required = false) String eventId,
-                                           @RequestParam(name = "status", required = false) String status,
-                                           @RequestParam(name = "reg", required = false) Boolean registration,
-                                           @RequestParam(name = "ftd", required = false) Boolean fistReplenishment) {
+    public Mono<PartnerEventEntity> registerEvent(@RequestParam("cid") String clickId,
+                                                  @RequestParam(value = "eid", required = false) String eventId,
+                                                  @RequestParam(name = "status", required = false) String status,
+                                                  @RequestParam(name = "reg", required = false) Boolean registration,
+                                                  @RequestParam(name = "ftd", required = false) Boolean fistReplenishment) {
         if (StringUtils.isBlank(clickId)) {
             log.warn("ClickId is empty for eventId {}", eventId);
             return Mono.empty();
@@ -51,7 +51,7 @@ public class PartnerEventController {
         return eventRepository.findByClickId(clickId)
                 .next()
                 .switchIfEmpty(
-                        eventRepository.save(EventEntity.builder()
+                        eventRepository.save(PartnerEventEntity.builder()
                                         .id(Uuids.timeBased())
                                         .clickId(clickId)
                                         .created(LocalDateTime.now(ZoneOffset.UTC)).build())
@@ -117,7 +117,7 @@ public class PartnerEventController {
         return eventRepository.deleteById(id);
     }
 
-    private PartnerEventDto mapToPartnerEventDto(EventEntity eventEntity) {
+    private PartnerEventDto mapToPartnerEventDto(PartnerEventEntity eventEntity) {
         return PartnerEventDto.builder()
                 .id(eventEntity.getId())
                 .lastChangeUpdated(eventEntity.getLastChangeUpdated())
