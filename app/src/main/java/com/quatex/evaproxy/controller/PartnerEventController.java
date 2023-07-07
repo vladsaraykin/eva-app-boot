@@ -52,7 +52,6 @@ public class PartnerEventController {
                 .next()
                 .switchIfEmpty(
                         eventRepository.save(PartnerEventEntity.builder()
-                                        .id(Uuids.timeBased())
                                         .clickId(clickId)
                                         .created(LocalDateTime.now(ZoneOffset.UTC)).build())
                                 .doOnSuccess(e -> log.info("Store new user with click: {}", clickId))
