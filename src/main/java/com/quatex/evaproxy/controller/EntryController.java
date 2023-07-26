@@ -8,11 +8,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+@Slf4j
 @RestController
 public class EntryController {
 
@@ -41,5 +47,13 @@ public class EntryController {
                 data.getT2().getLinkCryptoPay(),
                 data.getT2().getEnabled()
         ));
+    }
+
+    @Operation(summary = "Get random numbers")
+    @GetMapping("/numbers")
+    public Mono<List<Integer>> getRandomNumbers() {
+        return Mono.just(new Random().ints(64, 1, 6)
+                .boxed()
+                .collect(Collectors.toList()));
     }
 }
