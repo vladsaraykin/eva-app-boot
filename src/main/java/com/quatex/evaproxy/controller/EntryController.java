@@ -52,8 +52,17 @@ public class EntryController {
     @Operation(summary = "Get random numbers")
     @GetMapping("/numbers")
     public Mono<List<Integer>> getRandomNumbers() {
-        return Mono.just(new Random().ints(64, 1, 6)
+        List<Integer> result = new Random().ints(64, 2, 6)
                 .boxed()
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        result.set(0, 1);
+        result.set(9, 1);
+        result.set(18, 1);
+        result.set(27, 1);
+        result.set(36, 1);
+        result.set(45, 1);
+        result.set(54, 1);
+        result.set(63, 1);
+        return Mono.just(result);
     }
 }
