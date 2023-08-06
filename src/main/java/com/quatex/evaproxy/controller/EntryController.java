@@ -1,5 +1,6 @@
 package com.quatex.evaproxy.controller;
 
+import com.quatex.evaproxy.dto.CommentDto;
 import com.quatex.evaproxy.dto.EntryDataDto;
 import com.quatex.evaproxy.service.ManageService;
 import com.quatex.evaproxy.service.PromoCodeService;
@@ -9,11 +10,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -49,6 +51,8 @@ public class EntryController {
         ));
     }
 
+
+    //#########################mvp################################
     @Operation(summary = "Get random numbers")
     @GetMapping("/numbers")
     public Mono<List<Integer>> getRandomNumbers() {
@@ -64,5 +68,27 @@ public class EntryController {
         result.set(54, 1);
         result.set(63, 1);
         return Mono.just(result);
+    }
+
+    List<CommentDto> comments = new ArrayList<>();
+    @Operation(summary = "Clear all comments")
+    @DeleteMapping("/post/comment/clear")
+    public Mono<List<CommentDto>> clear() {
+        comments.clear();
+        return Mono.just(comments);
+    }
+
+    @Operation(summary = "Get comments")
+    @GetMapping("/post/comment/list")
+    public Mono<List<CommentDto>> getComments() {
+        return Mono.just(comments);
+    }
+
+    @Operation(summary = "Add new comment")
+    @PostMapping("/post/comment")
+    public Mono<CommentDto> addComment(@RequestBody CommentDto commentDto) {
+        commentDto.setDate(LocalDateTime.now(ZoneOffset.UTC));
+        comments.add(commentDto);
+        return Mono.just(commentDto);
     }
 }
