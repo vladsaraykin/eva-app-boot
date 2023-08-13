@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -87,6 +88,9 @@ public class EntryController {
     @Operation(summary = "Add new comment")
     @PostMapping("/post/comment")
     public Mono<CommentDto> addComment(@RequestBody CommentDto commentDto) {
+        if (StringUtils.isBlank(commentDto.getComment())){
+            return Mono.empty();
+        }
         commentDto.setDate(LocalDateTime.now(ZoneOffset.UTC));
         comments.add(commentDto);
         return Mono.just(commentDto);
