@@ -6,6 +6,7 @@ import com.quatex.evaproxy.service.JwtProxyService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -31,7 +32,7 @@ public class JwtProxyServiceImpl implements JwtProxyService {
     }
 
     @Override
-    public Mono<Map<String, Object>> registrationByPassword(RegistrationDto registrationDto) {
+    public Mono<ResponseEntity<Map<String, Object>>> registrationByPassword(RegistrationDto registrationDto) {
         return webClient.get()
                 .uri(GET_JWT_TOKEN_URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -43,8 +44,8 @@ public class JwtProxyServiceImpl implements JwtProxyService {
                         .accept(MediaType.APPLICATION_JSON)
                         .headers(h -> h.set("X-Request-Project", "otp"))
                         .bodyValue(registrationDto)
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<>() {}));
+                        .exchangeToMono(s -> s.toEntity(new ParameterizedTypeReference<>() {}))
+                );
     }
 
     @Override
