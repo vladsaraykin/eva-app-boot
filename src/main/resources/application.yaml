@@ -19,3 +19,6 @@ notification:
   headerMessage: '⏱ New event in 10 minutes ⚠️'
 
 token: qwerty321
+
+recaptcha:
+  enabled: false
