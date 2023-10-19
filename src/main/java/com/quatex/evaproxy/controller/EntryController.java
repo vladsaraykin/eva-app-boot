@@ -57,7 +57,7 @@ public class EntryController {
     @Operation(summary = "Get random numbers")
     @GetMapping("/numbers")
     public Mono<List<Integer>> getRandomNumbers() {
-        List<Integer> result = new Random().ints(64, 2, 6)
+        List<Integer> result = new Random().ints(100, 2, 6)
                 .boxed()
                 .collect(Collectors.toList());
         result.set(0, 1);
@@ -69,6 +69,12 @@ public class EntryController {
         result.set(54, 1);
         result.set(63, 1);
         return Mono.just(result);
+    }
+
+    @Operation(summary = "Get random value")
+    @GetMapping("/numbers")
+    public Mono<Integer> getRandomValue() {
+        return Mono.just(new Random().nextInt(100));
     }
 
     List<CommentDto> comments = new ArrayList<>();
