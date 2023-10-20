@@ -57,22 +57,23 @@ public class EntryController {
     @Operation(summary = "Get random numbers")
     @GetMapping("/numbers")
     public Mono<List<Integer>> getRandomNumbers() {
-        List<Integer> result = new Random().ints(100, 2, 6)
+        List<Integer> result = new Random().ints(13, 2, 100)
                 .boxed()
                 .collect(Collectors.toList());
-        result.set(0, 1);
-        result.set(9, 1);
-        result.set(18, 1);
-        result.set(27, 1);
-        result.set(36, 1);
-        result.set(45, 1);
-        result.set(54, 1);
-        result.set(63, 1);
+//        result.set(0, 1);
+//        result.set(9, 1);
+//        result.set(18, 1);
+//        result.set(27, 1);
+//        result.set(36, 1);
+//        result.set(45, 1);
+//        result.set(54, 1);
+//        result.set(63, 1);
         return Mono.just(result);
     }
 
-    @Operation(summary = "Get random value")
-    @GetMapping("/numbers")
+    @Operation(summary = "Get ra" +
+            "ndom value")
+    @GetMapping("/randomValue")
     public Mono<Integer> getRandomValue() {
         return Mono.just(new Random().nextInt(100));
     }
