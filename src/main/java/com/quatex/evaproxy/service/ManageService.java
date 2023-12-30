@@ -59,6 +59,22 @@ public class ManageService {
         return value != null ? Mono.just(value) : Mono.empty();
     }
 
+    public Mono<String> getSecondLink(Integer version) {
+        SettingEntity settingEntity = cache.get(ManagerRepository.ID);
+        if (settingEntity == null) {
+            return managerRepository.findById(ManagerRepository.ID)
+                    .doOnSuccess(e -> cache.put(e.getId(), e))
+                    .handle((setting, sink) -> {
+                        final String value = getValue(setting.getSecondLink(), isNewVersion(setting.getVersion(), version));
+                        if (value != null) {
+                            sink.next(value);
+                        }
+                    });
+        }
+        String value = getValue(settingEntity.getLink(), isNewVersion(settingEntity.getVersion(), version));
+        return value != null ? Mono.just(value) : Mono.empty();
+    }
+
     public Mono<Integer> getEnabled(Integer version) {
         SettingEntity settingEntity = cache.get(ManagerRepository.ID);
         if (settingEntity == null) {

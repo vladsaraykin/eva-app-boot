@@ -44,6 +44,11 @@ public class ManageController {
         return manageService.getLink(version);
     }
 
+    //todo refactoring. This functionality needed to be done quickly
+    @GetMapping("link/2")
+    public Mono<String> getSecondLink(@RequestParam(defaultValue = "1") Integer version) {
+        return manageService.getSecondLink(version);
+    }
     @GetMapping("linkPay")
     public Mono<String> getLinkPay() {
         return manageService.getLinkCryptoPay();
