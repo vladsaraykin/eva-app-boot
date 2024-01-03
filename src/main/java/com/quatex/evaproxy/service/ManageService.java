@@ -71,7 +71,7 @@ public class ManageService {
                         }
                     });
         }
-        String value = getValue(settingEntity.getLink(), isNewVersion(settingEntity.getVersion(), version));
+        String value = getValue(settingEntity.getSecondLink(), isNewVersion(settingEntity.getVersion(), version));
         return value != null ? Mono.just(value) : Mono.empty();
     }
 
