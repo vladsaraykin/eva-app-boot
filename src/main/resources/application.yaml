@@ -22,3 +22,12 @@ token: qwerty321
 
 recaptcha:
   enabled: false
+
+#default
+partner:
+  postback-params:
+    clickId: cid
+    eventId: eid
+    status: status
+    registration: reg
+    fistReplenishment: ftd

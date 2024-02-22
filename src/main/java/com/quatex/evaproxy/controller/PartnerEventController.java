@@ -1,10 +1,12 @@
 package com.quatex.evaproxy.controller;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.quatex.evaproxy.config.PartnerPostBackParams;
 import com.quatex.evaproxy.dto.PartnerEventDto;
 import com.quatex.evaproxy.entity.EventEntity;
 import com.quatex.evaproxy.repository.EventRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,28 +28,32 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("partnerevents")
+@RequiredArgsConstructor
 public class PartnerEventController {
 
     private final EventRepository eventRepository;
-    private final String tokenAccess;
+    private final PartnerPostBackParams partnerPostBackParams;
+    @Value("${token}")
+    private String tokenAccess;
 
-    public PartnerEventController(EventRepository eventRepository,
-                                  @Value("${token}") String tokenAccess) {
-        this.eventRepository = eventRepository;
-        this.tokenAccess = tokenAccess;
-    }
-
-    @Operation(summary = "Store event from partner service (postback)")
+    @Operation(summary = "S~tore event from partner service (postback)")
     @GetMapping("/storeEvent") // GET because service integration doesn't support other http methods
-    public Mono<EventEntity> registerEvent(@RequestParam("cid") String clickId,
-                                           @RequestParam(value = "eid", required = false) String eventId,
-                                           @RequestParam(name = "status", required = false) String status,
-                                           @RequestParam(name = "reg", required = false) Boolean registration,
-                                           @RequestParam(name = "ftd", required = false) Boolean fistReplenishment) {
+    public Mono<EventEntity> registerEvent(@RequestParam Map<String, String> allRequestParams) {
+        String clickId = allRequestParams.get(partnerPostBackParams.getClickId());
+        String eventId = allRequestParams.get(partnerPostBackParams.getEventId());
+        String status = allRequestParams.get(partnerPostBackParams.getStatus());
+        Boolean registration = Optional.ofNullable(allRequestParams.get(partnerPostBackParams.getRegistration()))
+                .map(Boolean::parseBoolean)
+                .orElse(null);
+        Boolean fistReplenishment = Optional.ofNullable(allRequestParams.get(partnerPostBackParams.getFistReplenishment()))
+                .map(Boolean::parseBoolean)
+                .orElse(null);
+
         if (StringUtils.isBlank(clickId)) {
             log.warn("ClickId is empty for eventId {}", eventId);
             return Mono.empty();
         }
+        log.debug("Store event Received params {}", allRequestParams);
         return eventRepository.findByClickId(clickId)
                 .next()
                 .switchIfEmpty(
