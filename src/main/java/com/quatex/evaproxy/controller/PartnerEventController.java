@@ -48,12 +48,11 @@ public class PartnerEventController {
         Boolean fistReplenishment = Optional.ofNullable(allRequestParams.get(partnerPostBackParams.getFistReplenishment()))
                 .map(Boolean::parseBoolean)
                 .orElse(null);
-
+        log.debug("Store event Received params {}", allRequestParams);
         if (StringUtils.isBlank(clickId)) {
             log.warn("ClickId is empty for eventId {}", eventId);
             return Mono.empty();
         }
-        log.debug("Store event Received params {}", allRequestParams);
         return eventRepository.findByClickId(clickId)
                 .next()
                 .switchIfEmpty(
