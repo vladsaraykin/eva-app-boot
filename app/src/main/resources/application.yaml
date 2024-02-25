@@ -1,0 +1,38 @@
+spring:
+  data:
+    cassandra:
+      config: classpath:keyspaces-application.conf
+      schema-action: CREATE_IF_NOT_EXISTS
+      keyspace-name: {{override_me}}
+      request:
+        consistency: local_quorum
+  r2dbc:
+    url: r2dbc:postgresql://{{override_me}}
+    username: {{override_me}}
+    password: {{override_me}}
+    properties:
+      schema: {{override_me}}
+keitaroUrl: {{override_me}}
+
+financialmodelingprep.apikey: {{override_me}}
+onesignal:
+  apiKey:
+  appId: {{override_me}}
+
+notification:
+  prefixes: 🔺,💰,📊, 💥
+  headerMessage: '⏱ New event in 10 minutes ⚠️'
+
+token: qwerty321
+
+recaptcha:
+  enabled: false
+
+#default
+partner:
+  postback-params:
+    clickId: cid
+    eventId: eid
+    status: status
+    registration: reg
+    fistReplenishment: ftd

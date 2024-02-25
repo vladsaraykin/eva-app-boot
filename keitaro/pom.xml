@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.quatex</groupId>
+        <artifactId>evaproxy</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <groupId>com.quatex.evaproxy</groupId>
+    <artifactId>keitaro</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>keitaro</name>
+    <description>keitaro</description>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+    <dependencies>
+        <!--POSTGRES-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-postgresql</artifactId>
+            <scope>runtime</scope>
+            <version>0.8.13.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.3.8</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- -->
+    </dependencies>
+
+</project>
