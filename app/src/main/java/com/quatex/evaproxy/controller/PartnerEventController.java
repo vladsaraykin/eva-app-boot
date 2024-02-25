@@ -1,10 +1,9 @@
 package com.quatex.evaproxy.controller;
 
-import com.datastax.oss.driver.api.core.uuid.Uuids;
-import com.quatex.evaproxy.keitaro.entity.PartnerEventEntity;
-import com.quatex.evaproxy.keitaro.repository.PartnerEventRepository;
 import com.quatex.evaproxy.config.PartnerPostBackParams;
 import com.quatex.evaproxy.dto.PartnerEventDto;
+import com.quatex.evaproxy.keitaro.entity.PartnerEventEntity;
+import com.quatex.evaproxy.keitaro.repository.PartnerEventRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,7 @@ public class PartnerEventController {
 
     @Operation(summary = "S~tore event from partner service (postback)")
     @GetMapping("/storeEvent") // GET because service integration doesn't support other http methods
-    public Mono<EventEntity> registerEvent(@RequestParam Map<String, String> allRequestParams) {
+    public Mono<PartnerEventEntity> registerEvent(@RequestParam Map<String, String> allRequestParams) {
         String clickId = allRequestParams.get(partnerPostBackParams.getClickId());
         String eventId = allRequestParams.get(partnerPostBackParams.getEventId());
         String status = allRequestParams.get(partnerPostBackParams.getStatus());
