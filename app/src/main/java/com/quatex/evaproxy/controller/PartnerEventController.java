@@ -35,6 +35,23 @@ public class PartnerEventController {
     @Value("${token}")
     private String tokenAccess;
 
+    @Operation(summary = "Store event from partner service (postback)")
+    @GetMapping("/storeEvent/{action}") // GET because service integration doesn't support other http methods
+    public Mono<PartnerEventEntity> registerEventForAction(
+            @PathVariable String action,
+            @RequestParam Map<String, String> allRequestParams) {
+        String clickId = allRequestParams.get(partnerPostBackParams.getClickId());
+        String eventId = allRequestParams.get(partnerPostBackParams.getEventId());
+        String status = allRequestParams.get(partnerPostBackParams.getStatus());
+        Boolean reg = "reg".equalsIgnoreCase(action);
+        Boolean ftd = "ftd".equalsIgnoreCase(action);
+        log.debug("Store event Received params {}", allRequestParams);
+        if (StringUtils.isBlank(clickId)) {
+            log.warn("ClickId is empty for eventId {}", eventId);
+            return Mono.empty();
+        }
+        return storeEvent(clickId, status, reg, ftd);
+    }
     @Operation(summary = "S~tore event from partner service (postback)")
     @GetMapping("/storeEvent") // GET because service integration doesn't support other http methods
     public Mono<PartnerEventEntity> registerEvent(@RequestParam Map<String, String> allRequestParams) {
@@ -52,6 +69,13 @@ public class PartnerEventController {
             log.warn("ClickId is empty for eventId {}", eventId);
             return Mono.empty();
         }
+        return storeEvent(clickId, status, registration, fistReplenishment);
+    }
+
+    private Mono<PartnerEventEntity> storeEvent(String clickId,
+                                                String status,
+                                                Boolean registration,
+                                                Boolean fistReplenishment) {
         return eventRepository.findByClickId(clickId)
                 .next()
                 .switchIfEmpty(
