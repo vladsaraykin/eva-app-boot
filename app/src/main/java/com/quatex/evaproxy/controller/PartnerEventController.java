@@ -43,8 +43,8 @@ public class PartnerEventController {
         String clickId = allRequestParams.get(partnerPostBackParams.getClickId());
         String eventId = allRequestParams.get(partnerPostBackParams.getEventId());
         String status = allRequestParams.get(partnerPostBackParams.getStatus());
-        Boolean reg = "reg".equalsIgnoreCase(action);
-        Boolean ftd = "ftd".equalsIgnoreCase(action);
+        Boolean reg = "reg".equalsIgnoreCase(action) ? true : null;
+        Boolean ftd = "ftd".equalsIgnoreCase(action) ? true : null;
         log.debug("Store event Received params {}", allRequestParams);
         if (StringUtils.isBlank(clickId)) {
             log.warn("ClickId is empty for eventId {}", eventId);
