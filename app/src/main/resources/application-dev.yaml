@@ -1,0 +1,16 @@
+spring:
+  data:
+    cassandra:
+      config: ''
+      schema-action: CREATE_IF_NOT_EXISTS
+      keyspace-name: evaapp
+      request:
+        consistency: local_quorum
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    properties:
+      schema: postgres
+
+keitaroUrl: test
