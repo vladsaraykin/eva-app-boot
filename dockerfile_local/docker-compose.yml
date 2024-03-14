@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  cassandra:
+    image: cassandra:4.0
+    ports:
+      - 9042:9042
+    volumes:
+      - /var/lib/cassandra
+  init:
+    image: cassandra:4
+    depends_on:
+      - cassandra
+    restart: "always"
+    entrypoint: ["sh", "/init.sh" ]
+
+    volumes:
+      - ./init.sh:/init.sh
+  server:
+    container_name: "evaapp"
+    restart: always
+    ports:
+      - 8080:8080/tcp
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      JAVA_OPTS: -Dspring.profiles.active=dev -Dspring.data.cassandra.contactPoints=host.docker.internal:9042
+    depends_on:
+      #TODO make delay correctly
+      - init

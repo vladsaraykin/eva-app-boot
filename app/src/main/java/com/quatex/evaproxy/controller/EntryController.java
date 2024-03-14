@@ -1,5 +1,6 @@
 package com.quatex.evaproxy.controller;
 
+import com.quatex.evaproxy.dto.CommentDto;
 import com.quatex.evaproxy.dto.EntryDataDto;
 import com.quatex.evaproxy.service.ManageService;
 import com.quatex.evaproxy.service.PromoCodeService;
@@ -8,11 +9,19 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+@Slf4j
 @RestController
 public class EntryController {
 
@@ -41,5 +50,56 @@ public class EntryController {
                 data.getT2().getLinkCryptoPay(),
                 data.getT2().getEnabled()
         ));
+    }
+
+
+    //#########################mvp################################
+    @Operation(summary = "Get random numbers")
+    @GetMapping("/numbers")
+    public Mono<List<Integer>> getRandomNumbers() {
+        List<Integer> result = new Random().ints(13, 2, 100)
+                .boxed()
+                .collect(Collectors.toList());
+//        result.set(0, 1);
+//        result.set(9, 1);
+//        result.set(18, 1);
+//        result.set(27, 1);
+//        result.set(36, 1);
+//        result.set(45, 1);
+//        result.set(54, 1);
+//        result.set(63, 1);
+        return Mono.just(result);
+    }
+
+    @Operation(summary = "Get ra" +
+            "ndom value")
+    @GetMapping("/randomValue")
+    public Mono<Integer> getRandomValue() {
+        return Mono.just(new Random().nextInt(100));
+    }
+
+    List<CommentDto> comments = new ArrayList<>();
+    @Operation(summary = "Clear all comments")
+    @DeleteMapping("/post/comment/clear")
+    public Mono<List<CommentDto>> clear() {
+        comments.clear();
+        return Mono.just(comments);
+    }
+
+    @Operation(summary = "Get comments")
+    @GetMapping("/post/comment/list")
+    public Mono<List<CommentDto>> getComments() {
+        return Mono.just(comments);
+    }
+
+    @Operation(summary = "Add new comment")
+    @PostMapping("/post/comment")
+    public Mono<CommentDto> addComment(@RequestBody CommentDto commentDto) {
+        if (StringUtils.isBlank(commentDto.getComment())){
+            return Mono.empty();
+        }
+        commentDto.setDate(LocalDateTime.now(ZoneOffset.UTC));
+        comments.add(commentDto);
+        return Mono.just(commentDto);
     }
 }

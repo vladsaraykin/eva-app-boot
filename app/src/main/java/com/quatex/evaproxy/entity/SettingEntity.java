@@ -24,6 +24,12 @@ public class SettingEntity implements Serializable {
     })
     private VersionStructure<String> link;
 
+    //todo refactoring
+    @CassandraType(type = CassandraType.Name.TUPLE, typeArguments = {
+            CassandraType.Name.TEXT,
+            CassandraType.Name.TEXT
+    })
+    private VersionStructure<String> secondLink;
     @CassandraType(type = CassandraType.Name.TUPLE, typeArguments = {
             CassandraType.Name.INT,
             CassandraType.Name.INT
