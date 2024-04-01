@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.quatex.evaproxy.keitaro.config.KeitaroAutoConfiguration
+  com.quatex.evaproxy.keitaro.config.FlywayConfiguration

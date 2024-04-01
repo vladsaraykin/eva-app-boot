@@ -1,7 +1,8 @@
 package com.quatex.evaproxy.config;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.quatex.evaproxy.keitaro.config.KeitaroAutoConfiguration;
+import com.quatex.evaproxy.dto.PartnerEventDto;
+import com.quatex.evaproxy.keitaro.config.FlywayConfiguration;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -22,6 +23,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
@@ -30,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @EnableScheduling
 @EnableSchedulerLock(defaultLockAtMostFor = "10s")
 @EnableWebFlux
-@Import(KeitaroAutoConfiguration.class)
+@Import(FlywayConfiguration.class)
 @org.springframework.context.annotation.Configuration
 public class AppConfig {
 
@@ -66,5 +68,10 @@ public class AppConfig {
     @Bean
     public LockingTaskExecutor lockingTaskExecutor(LockProvider lockProvider) {
         return new DefaultLockingTaskExecutor(lockProvider);
+    }
+
+    @Bean
+    public Sinks.Many<PartnerEventDto> sink(){
+        return Sinks.many().replay().latest();
     }
 }

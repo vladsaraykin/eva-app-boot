@@ -24,4 +24,6 @@ public class PartnerEventEntity implements Serializable {
     private Boolean fistReplenishment;
     private LocalDateTime created;
     private LocalDateTime lastChangeUpdated;
+
+    private EventSource eventSource;
 }
