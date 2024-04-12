@@ -1,7 +1,8 @@
 package com.quatex.evaproxy.websocket;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.quatex.evaproxy.dto.PartnerEventDto;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.quatex.evaproxy.dto.PartnerEventSocketMessage;
 import com.quatex.evaproxy.keitaro.repository.PartnerEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -11,10 +12,12 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -24,11 +27,24 @@ import java.util.function.Consumer;
 public class PartnerEventWebSocketHandler implements WebSocketHandler {
 
 
-    private final Sinks.Many<PartnerEventDto> partnerEventSink;
+    private final Sinks.Many<PartnerEventSocketMessage> partnerEventSink;
     private final PartnerEventRepository partnerEventRepository;
-
-    private final ObjectMapper objectMapper;
     private final String START_LISTEN = "start listen";
+    public static final String EVENT_REGISTRATION = "portal_event_registration_completed";
+    public static final String EVENT_DEPOSIT = "portal_event_deposit_completed";
+
+    private final Cache<String, WebSocketSessionDataPublisher> ttlCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(10))
+            .removalListener((key, item, cause) -> {
+                var ws =(WebSocketSessionDataPublisher)item;
+                if (ws != null) {
+                    log.info("remove old session {} {}", key, ws.clickId);
+                    ws.disposable.dispose();
+                    ws.session.close().subscribe();
+                }
+            })
+            .build();
+
     @Override
     public Mono<Void> handle(WebSocketSession session) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(session.getHandshakeInfo().getUri());
@@ -36,38 +52,50 @@ public class PartnerEventWebSocketHandler implements WebSocketHandler {
         String clickId = queryParams.get("clickId");
 
         log.info("Websocket connected for id " + clickId);
-        partnerEventSink.asFlux().subscribe(new WebSocketSessionDataPublisher(clickId, session));
-        Flux<WebSocketMessage> messageFlux = session.receive().share();
+        var wsPublisher = new WebSocketSessionDataPublisher(clickId, session);
 
-//        partnerEventSink.
-//        Sinks.EmitResult emitResult = partnerEventSink.tryEmitNext(mapToPartnerEventDto(partnerEventEntity));
-//        log.info("ClickId({})Emit result status {} {}", clickId, emitResult.name(), emitResult.isSuccess());
+        wsPublisher.disposable = partnerEventSink.asFlux().subscribe(wsPublisher);
+        ttlCache.put(session.getId(), wsPublisher);
+
+        Flux<WebSocketMessage> messageFlux = session.receive().takeUntil(s -> !session.isOpen()).share();
 
         Flux<String> input = messageFlux
                 .filter(webSocketMessage -> webSocketMessage.getType() == WebSocketMessage.Type.TEXT)
                 .map(WebSocketMessage::getPayloadAsText)
                 .flatMap(inputTxt -> {
+                    log.info("Received message from " + clickId);
                     if (START_LISTEN.equalsIgnoreCase(inputTxt)) {
                         return partnerEventRepository.findByClickId(clickId)
                                 .map(entity -> {
-                                    partnerEventSink.tryEmitNext(PartnerEventDto.fromEntity(entity));
-                                    return "succes";
+                                    if (Boolean.TRUE.equals(entity.getRegistration())) {
+                                        partnerEventSink.tryEmitNext(PartnerEventSocketMessage.builder()
+                                                .message(EVENT_REGISTRATION)
+                                                .clickId(entity.getClickId())
+                                                .eventSource(entity.getEventSource())
+                                                .build());
+                                    }
+                                    if (Boolean.TRUE.equals(entity.getFistReplenishment())) {
+                                        partnerEventSink.tryEmitNext(PartnerEventSocketMessage.builder()
+                                                .message(EVENT_DEPOSIT)
+                                                .clickId(entity.getClickId())
+                                                .eventSource(entity.getEventSource())
+                                                .build());
+                                    }
+                                    return "success";
                                 });
                     }
                     return Mono.empty();
-                })
-                .doOnNext(s -> {
-                    log.info("Received message from " + clickId);
                 });
 
-
+        log.info("WebSocket subscribers {}", partnerEventSink.currentSubscriberCount());
         return Flux.merge(input).then();
     }
-
-    private class WebSocketSessionDataPublisher implements Consumer<PartnerEventDto> {
+    private class WebSocketSessionDataPublisher implements Consumer<PartnerEventSocketMessage> {
 
         String clickId;
         WebSocketSession session;
+
+        Disposable disposable;
         public WebSocketSessionDataPublisher(String clickId, WebSocketSession session){
             this.clickId = clickId;
             this.session = session;
@@ -75,11 +103,15 @@ public class PartnerEventWebSocketHandler implements WebSocketHandler {
 
         @SneakyThrows
         @Override
-        public void accept(PartnerEventDto eventDto) {
-            log.info("Message to be sent for clickId " + eventDto.getClickId());
-            if(this.clickId.equalsIgnoreCase(eventDto.getClickId())){
-                log.info("[Before Send]Message to be sent for clickId " + eventDto.getClickId());
-                session.send(Mono.just(session.textMessage("Update user event:\n" + objectMapper.writeValueAsString(eventDto)))).subscribe();
+        public void accept(PartnerEventSocketMessage eventSocketMessage) {
+            if(this.clickId.equalsIgnoreCase(eventSocketMessage.getClickId()) && eventSocketMessage.getMessage() != null) {
+                if (session.isOpen()) {
+                    log.info("Message to be sent for clickId " + eventSocketMessage.getClickId());
+                    ttlCache.put(session.getId(), this); //update time to live up
+                    session.send(Mono.just(session.textMessage(eventSocketMessage.getMessage() + " " + eventSocketMessage.getEventSource()))).subscribe();
+                } else {
+                    disposable.dispose();
+                }
             }
         }
     }

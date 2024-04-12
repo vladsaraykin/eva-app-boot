@@ -1,9 +1,10 @@
 package com.quatex.evaproxy.service;
 
-import com.quatex.evaproxy.dto.PartnerEventDto;
+import com.quatex.evaproxy.dto.PartnerEventSocketMessage;
 import com.quatex.evaproxy.keitaro.entity.EventSource;
 import com.quatex.evaproxy.keitaro.entity.PartnerEventEntity;
 import com.quatex.evaproxy.keitaro.repository.PartnerEventRepository;
+import com.quatex.evaproxy.websocket.PartnerEventWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PartnerEventService {
 
-    private final Sinks.Many<PartnerEventDto> partnerEventSink;
+    private final Sinks.Many<PartnerEventSocketMessage> partnerEventSink;
     private final PartnerEventRepository eventRepository;
     public Mono<PartnerEventEntity> storeEvent(String clickId,
                                                 String status,
@@ -57,8 +58,26 @@ public class PartnerEventService {
                     return needStore ? eventRepository.save(eventEntityDb) : Mono.just(eventEntityDb);
                 })
                 .next().doOnSuccess(partnerEventEntity -> {
-                    Sinks.EmitResult emitResult = partnerEventSink.tryEmitNext(PartnerEventDto.fromEntity(partnerEventEntity));
-                    log.info("ClickId({})Emit result status {} {}", clickId, emitResult.name(), emitResult.isSuccess());
+                    if (Boolean.TRUE.equals(registration)) {
+                        Sinks.EmitResult emitResult = partnerEventSink.tryEmitNext(
+                                PartnerEventSocketMessage.builder()
+                                        .message(PartnerEventWebSocketHandler.EVENT_REGISTRATION)
+                                        .clickId(partnerEventEntity.getClickId())
+                                        .eventSource(partnerEventEntity.getEventSource())
+                                        .build()
+                        );
+                        log.info("ClickId({})Emit result status {} {}", clickId, emitResult.name(), emitResult.isSuccess());
+                    }
+                    if (Boolean.TRUE.equals(fistReplenishment)) {
+                        Sinks.EmitResult emitResult = partnerEventSink.tryEmitNext(
+                                PartnerEventSocketMessage.builder()
+                                        .message(PartnerEventWebSocketHandler.EVENT_DEPOSIT)
+                                        .clickId(partnerEventEntity.getClickId())
+                                        .eventSource(partnerEventEntity.getEventSource())
+                                        .build()
+                        );
+                        log.info("ClickId({})Emit result status {} {}", clickId, emitResult.name(), emitResult.isSuccess());
+                    }
                 });
     }
 

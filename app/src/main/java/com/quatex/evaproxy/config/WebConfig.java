@@ -1,6 +1,6 @@
 package com.quatex.evaproxy.config;
 
-import com.quatex.evaproxy.dto.PartnerEventDto;
+import com.quatex.evaproxy.dto.PartnerEventSocketMessage;
 import com.quatex.evaproxy.websocket.PartnerEventWebSocketHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class WebConfig {
 
     @Bean
-    public Sinks.Many<PartnerEventDto> partnerEventSink(){
+    public Sinks.Many<PartnerEventSocketMessage> partnerEventSink(){
         return Sinks.many().multicast().directBestEffort();
     }
     @Bean

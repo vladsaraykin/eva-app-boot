@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
-import java.util.Iterator;
 import java.util.UUID;
 
 public interface PartnerEventRepository extends ReactiveCrudRepository<PartnerEventEntity, UUID> {
