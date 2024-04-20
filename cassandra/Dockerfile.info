@@ -1,6 +1,7 @@
 
 Запуск докер образа кассандры
 docker run --rm -p 9042:9042 -d --name cassandra cassandra
+docker run --rm --name habr-pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres -d postgres
 
 Публикация образа в облаке
 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/j6m7r3t6
