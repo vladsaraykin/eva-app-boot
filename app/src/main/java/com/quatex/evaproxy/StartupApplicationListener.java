@@ -2,7 +2,6 @@ package com.quatex.evaproxy;
 
 import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.repository.ManagerRepository;
-import com.quatex.evaproxy.scheduled.EconomicCalendarScheduled;
 import com.quatex.evaproxy.service.ManagerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class StartupApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
     private final ManagerService managerService;
-    private final EconomicCalendarScheduled economicCalendarScheduled;
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         managerService.findAll()
@@ -23,7 +21,5 @@ public class StartupApplicationListener implements ApplicationListener<ContextRe
                         .id(ManagerRepository.ID)
                         .version(1)
                         .build())).subscribe();
-
-        economicCalendarScheduled.synchronizeEconomicEvents();
     }
 }

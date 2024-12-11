@@ -96,13 +96,12 @@ public class PartnerEventController {
 
     @Operation(summary = "Get click data")
     @GetMapping("/clickData")
-    public Mono<Map<String, Boolean>> getClickData(@RequestParam String clickId,
-                                                   @RequestParam(required = false, defaultValue = "PARTNER") EventSource eventSource) {
+    public Flux<Map<String, Object>> getClickData(@RequestParam String clickId) {
         return eventRepository.findByClickId(clickId)
-                .next()
-                .<Map<String, Boolean>>handle((eventEntity, sink) -> sink.next(Map.of(
+                .<Map<String, Object>>handle((eventEntity, sink) -> sink.next(Map.of(
                         "registration", Optional.ofNullable(eventEntity.getRegistration()).orElse(false),
-                        "firstReplenishment", Optional.ofNullable(eventEntity.getFistReplenishment()).orElse(false)
+                        "firstReplenishment", Optional.ofNullable(eventEntity.getFistReplenishment()).orElse(false),
+                        "eventSource", eventEntity.getEventSource()
                 )))
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }

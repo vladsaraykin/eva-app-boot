@@ -14,19 +14,7 @@ spring:
       schema: {{override_me}}
 keitaroUrl: {{override_me}}
 
-financialmodelingprep.apikey: {{override_me}}
-onesignal:
-  apiKey:
-  appId: {{override_me}}
-
-notification:
-  prefixes: 🔺,💰,📊, 💥
-  headerMessage: '⏱ New event in 10 minutes ⚠️'
-
 token: qwerty321
-
-recaptcha:
-  enabled: false
 
 #default
 partner:
