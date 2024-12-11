@@ -7,7 +7,8 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.io.Serializable;
 
-@Table(value = "setting")
+//TODO удалить позже(устаревший функционал)
+//@Table(value = "setting")
 @Builder
 @Getter
 @Setter

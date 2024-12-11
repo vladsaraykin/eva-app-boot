@@ -47,7 +47,6 @@ public class EntryController {
         ).map(data -> new EntryDataDto(
                 data.getT1(),
                 data.getT2().getLink(),
-                data.getT2().getLinkCryptoPay(),
                 data.getT2().getEnabled()
         ));
     }

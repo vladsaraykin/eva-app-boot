@@ -10,13 +10,11 @@ public class EntryDataDto {
 
     private final List<PromoCodeEntity> promos;
     private final String link;
-    private final String linkPay;
     private final Integer status;
 
-    public EntryDataDto(List<PromoCodeEntity> promos, String link, String linkPay, Integer status) {
+    public EntryDataDto(List<PromoCodeEntity> promos, String link, Integer status) {
         this.promos = promos;
         this.link = link;
-        this.linkPay = linkPay;
         this.status = status;
     }
 
