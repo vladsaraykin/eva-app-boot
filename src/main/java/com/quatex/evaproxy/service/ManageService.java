@@ -1,119 +1,69 @@
 package com.quatex.evaproxy.service;
 
 import com.quatex.evaproxy.dto.SettingDto;
+import com.quatex.evaproxy.entity.ManagerSetting;
 import com.quatex.evaproxy.entity.SettingEntity;
 import com.quatex.evaproxy.entity.VersionStructure;
-import com.quatex.evaproxy.repository.ManagerRepository;
+import com.quatex.evaproxy.repository.ManagerSettingRepository;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ManageService {
 
-    private final ManagerRepository managerRepository;
-    private final ConcurrentHashMap<Integer, SettingEntity> cache = new ConcurrentHashMap<>();
+    private final ManagerSettingRepository managerRepository;
 
-    public ManageService(ManagerRepository managerRepository) {
+    private final ConcurrentHashMap<Integer, ManagerSetting> cache = new ConcurrentHashMap<>();
+
+    public ManageService(ManagerSettingRepository managerRepository) {
         this.managerRepository = managerRepository;
     }
 
-    public Mono<SettingEntity> getSetting() {
-        SettingEntity settingEntity = cache.get(ManagerRepository.ID);
-        if (settingEntity == null) {
-            return managerRepository.findById(ManagerRepository.ID)
-                    .doOnSuccess(e -> cache.put(e.getId(), e));
+    public Flux<ManagerSetting> getSetting() {
+        if (cache.isEmpty()) {
+            return managerRepository
+                    .findAll()
+                    .doOnNext(s -> cache.put(s.getVersion(), s));
         }
-        return Mono.just(settingEntity);
+        return Flux.fromIterable(cache.values());
     }
 
-    public Mono<SettingEntity> update(SettingEntity settingEntity) {
-        settingEntity.setId(ManagerRepository.ID);
-        return managerRepository.save(settingEntity).doOnSuccess(e -> cache.put(e.getId(), e));
+    public Mono<ManagerSetting> update(ManagerSetting settingEntity) {
+        return managerRepository.save(settingEntity).doOnSuccess(e -> cache.put(e.getVersion(), e));
     }
 
     public Mono<SettingDto> getSettings(Integer version) {
-        return managerRepository.findById(ManagerRepository.ID)
+        return managerRepository.findById(version)
                 .map(entity -> SettingDto.builder()
-                        .enabled(getValue(entity.getEnabled(), isNewVersion(entity.getVersion(), version)))
-                        .link(getValue(entity.getLink(), isNewVersion(entity.getVersion(), version)))
-                        .linkCryptoPay(entity.getLinkCryptoPay())
+                        .enabled(entity.getEnabled())
+                        .link(entity.getLink())
                         .build());
     }
 
     public Mono<String> getLink(Integer version) {
-        SettingEntity settingEntity = cache.get(ManagerRepository.ID);
+        ManagerSetting settingEntity = cache.get(version);
         if (settingEntity == null) {
-            return managerRepository.findById(ManagerRepository.ID)
-                    .doOnSuccess(e -> cache.put(e.getId(), e))
-                    .handle((setting, sink) -> {
-                        final String value = getValue(setting.getLink(), isNewVersion(setting.getVersion(), version));
-                        if (value != null) {
-                            sink.next(value);
-                        }
-                    });
+            return managerRepository.findById(version)
+                    .doOnSuccess(e -> cache.put(version, e))
+                    .map(ManagerSetting::getLink);
         }
-        String value = getValue(settingEntity.getLink(), isNewVersion(settingEntity.getVersion(), version));
-        return value != null ? Mono.just(value) : Mono.empty();
-    }
-
-    public Mono<String> getSecondLink(Integer version) {
-        SettingEntity settingEntity = cache.get(ManagerRepository.ID);
-        if (settingEntity == null) {
-            return managerRepository.findById(ManagerRepository.ID)
-                    .doOnSuccess(e -> cache.put(e.getId(), e))
-                    .handle((setting, sink) -> {
-                        final String value = getValue(setting.getSecondLink(), isNewVersion(setting.getVersion(), version));
-                        if (value != null) {
-                            sink.next(value);
-                        }
-                    });
-        }
-        String value = getValue(settingEntity.getSecondLink(), isNewVersion(settingEntity.getVersion(), version));
-        return value != null ? Mono.just(value) : Mono.empty();
+        return Mono.just(settingEntity.getLink());
     }
 
     public Mono<Integer> getEnabled(Integer version) {
-        SettingEntity settingEntity = cache.get(ManagerRepository.ID);
+        ManagerSetting settingEntity = cache.get(version);
         if (settingEntity == null) {
-            return managerRepository.findById(ManagerRepository.ID)
-                    .doOnSuccess(e -> cache.put(e.getId(), e))
-                    .handle((setting, sink) -> {
-                        final Integer value = getValue(setting.getEnabled(), isNewVersion(setting.getVersion(), version));
-                        if (value != null) {
-                            sink.next(value);
-                        }
-                    });
+            return managerRepository.findById(version)
+                    .doOnSuccess(e -> cache.put(version, e))
+                    .map(ManagerSetting::getEnabled)
+                    .switchIfEmpty(Mono.error(new NotImplementedException("This version is unsupported: " + version)));
         }
-        Integer value = getValue(settingEntity.getEnabled(), isNewVersion(settingEntity.getVersion(), version));
-        return value != null ? Mono.just(value) : Mono.empty();
+        return Mono.just(settingEntity.getEnabled());
 
-    }
-
-    public Mono<String> getLinkCryptoPay() {
-        SettingEntity settingEntity = cache.get(ManagerRepository.ID);
-        if (settingEntity == null) {
-            return managerRepository.findById(ManagerRepository.ID)
-                    .doOnSuccess(e -> cache.put(e.getId(), e))
-                    .handle((setting, sink) -> {
-                        if (setting.getLinkCryptoPay() != null) {
-                            sink.next(setting.getLinkCryptoPay());
-                        }
-                    });
-        }
-        return settingEntity.getLinkCryptoPay() != null ? Mono.just(settingEntity.getLinkCryptoPay()) : Mono.empty();
-    }
-
-    private <T> T getValue(VersionStructure<T> value, boolean newVersion) {
-        if (value == null) {
-            return null;
-        }
-        return newVersion ? value.getNewValue() : value.getCurrentValue();
-    }
-
-    private boolean isNewVersion(@NonNull Integer currentVersion, Integer version) {
-        return version > currentVersion;
     }
 }

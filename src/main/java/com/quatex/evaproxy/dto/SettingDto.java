@@ -10,5 +10,4 @@ import lombok.*;
 public class SettingDto {
     private String link;
     private Integer enabled;
-    private String linkCryptoPay;
 }

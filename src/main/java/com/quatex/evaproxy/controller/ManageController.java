@@ -1,6 +1,6 @@
 package com.quatex.evaproxy.controller;
 
-import com.quatex.evaproxy.entity.SettingEntity;
+import com.quatex.evaproxy.entity.ManagerSetting;
 import com.quatex.evaproxy.service.KeitaroService;
 import com.quatex.evaproxy.service.ManageService;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ua_parser.Client;
 import ua_parser.Parser;
@@ -30,28 +31,18 @@ public class ManageController {
     }
 
     @GetMapping("settings")
-    public Mono<SettingEntity> getSettings() {
+    public Flux<ManagerSetting> getSettingsNew() {
         return manageService.getSetting();
     }
 
     @PostMapping("settings")
-    public Mono<SettingEntity> updateSettings(@RequestBody SettingEntity settingEntity) {
+    public Mono<ManagerSetting> updateSettings(@RequestBody ManagerSetting settingEntity) {
         return manageService.update(settingEntity);
     }
 
     @GetMapping("link")
     public Mono<String> getLink(@RequestParam(defaultValue = "1") Integer version) {
         return manageService.getLink(version);
-    }
-
-    //todo refactoring. This functionality needed to be done quickly
-    @GetMapping("link/2")
-    public Mono<String> getSecondLink(@RequestParam(defaultValue = "1") Integer version) {
-        return manageService.getSecondLink(version);
-    }
-    @GetMapping("linkPay")
-    public Mono<String> getLinkPay() {
-        return manageService.getLinkCryptoPay();
     }
 
     @GetMapping("enabled")
